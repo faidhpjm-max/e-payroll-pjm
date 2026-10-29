@@ -378,13 +378,16 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
 [data-theme=dark] .st-Probation,[data-theme=dark] .b-pending{color:#f4b066}
 [data-theme=dark] .st-Dirumahkan{background:rgba(194,65,12,.2);color:#f7a26b}
 [data-theme=dark] .b-draft{background:rgba(240,153,47,.14);color:#f4b066;border-color:rgba(240,153,47,.45)}
-[data-theme=dark] .g-in,[data-theme=dark] .g-tot{background:rgba(59,142,230,.16)!important;color:#9cc8f5!important}
-[data-theme=dark] .g-kas{background:rgba(240,153,47,.14)!important;color:#f4b066!important}
-[data-theme=dark] .g-out,[data-theme=dark] .g-outt{background:rgba(239,93,93,.14)!important;color:#f29a9a!important}
-[data-theme=dark] .g-net{background:rgba(47,179,109,.15)!important;color:#6fd8a0!important}
-[data-theme=dark] td.tot-in{background:rgba(59,142,230,.07)}
-[data-theme=dark] td.tot-out{background:rgba(239,93,93,.07);color:#f29a9a}
-[data-theme=dark] td.net{background:rgba(47,179,109,.08)}
+/* Warna tint dilapis di atas warna solid, supaya header/footer sticky tidak tembus pandang saat tabel di-scroll */
+[data-theme=dark] .g-in,[data-theme=dark] .g-tot{background:linear-gradient(rgba(59,142,230,.2),rgba(59,142,230,.2)),var(--surface-2)!important;color:#9cc8f5!important}
+[data-theme=dark] .g-kas{background:linear-gradient(rgba(240,153,47,.17),rgba(240,153,47,.17)),var(--surface-2)!important;color:#f4b066!important}
+[data-theme=dark] .g-out,[data-theme=dark] .g-outt{background:linear-gradient(rgba(239,93,93,.17),rgba(239,93,93,.17)),var(--surface-2)!important;color:#f29a9a!important}
+[data-theme=dark] .g-net{background:linear-gradient(rgba(47,179,109,.18),rgba(47,179,109,.18)),var(--surface-2)!important;color:#6fd8a0!important}
+[data-theme=dark] td.tot-in{background:linear-gradient(rgba(59,142,230,.07),rgba(59,142,230,.07)),var(--surface)}
+[data-theme=dark] td.tot-out{background:linear-gradient(rgba(239,93,93,.07),rgba(239,93,93,.07)),var(--surface);color:#f29a9a}
+[data-theme=dark] td.net{background:linear-gradient(rgba(47,179,109,.08),rgba(47,179,109,.08)),var(--surface)}
+[data-theme=dark] tfoot td.tot-in,[data-theme=dark] tfoot td.tot-out,[data-theme=dark] tfoot td.net{background-color:var(--surface-2)}
+[data-theme=dark] .fz thead th,[data-theme=dark] .fz tfoot td{background-color:var(--surface-2)}
 [data-theme=dark] .callout{color:#9cc8f5}
 [data-theme=dark] .callout.warn,[data-theme=dark] .warn{color:#f4b066}
 [data-theme=dark] .resultbox.ok{color:#6fd8a0}
@@ -738,7 +741,8 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
       <section id="tab-mutasi" class="page" hidden>
         <div class="card">
           <div class="card-head bordered"><h3><span class="hi hi-blue"><svg class="ic ic-sm"><use href="#i-uplus"/></svg></span>Karyawan Baru yang Bergabung di Bulan <span class="mutPeriod"></span></h3>
-            <span class="sub">Otomatis dari Tanggal Mulai Bekerja</span></div>
+            <span class="sub">Otomatis dari Tanggal Mulai Bekerja</span>
+            <div class="sp"><button class="btn btn-primary" onclick="openEmp(null, state.period + '-01')"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Tambah Karyawan Baru</button></div></div>
           <div class="table-wrap"><table>
             <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Jabatan</th><th>Tgl. Mulai Bekerja</th><th>Site</th><th class="num">Gapok</th><th class="num">Tn. Lapangan</th><th class="num">Gaji Bersih</th></tr></thead>
             <tbody id="newBody"></tbody><tfoot id="newFoot"></tfoot>
@@ -758,6 +762,16 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
           <div class="table-wrap"><table>
             <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Jabatan</th><th>Tgl. Mulai Bekerja</th><th>Tgl. PHK</th><th>Masa Kerja</th><th>Site</th><th>Hak Kompensasi</th><th>Alasan PHK</th><th class="num">Kompensasi</th><th></th></tr></thead>
             <tbody id="phkBody"></tbody><tfoot id="phkFoot"></tfoot>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-head bordered"><h3><span class="hi hi-orange"><svg class="ic ic-sm"><use href="#i-logout"/></svg></span>Karyawan Resign di Bulan <span class="mutPeriod"></span></h3>
+            <span class="sub">Gaji prorata = Total Gaji &divide; jumlah hari dalam bulan &times; jumlah hari s/d tgl. resign</span>
+            <div class="sp"><button class="btn btn-amber" onclick="openResign()"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Catat Resign</button></div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Jabatan</th><th>Tgl. Mulai Bekerja</th><th>Tgl. Resign</th><th>Masa Kerja</th><th>Site</th>
+              <th class="num">Gaji Pokok</th><th class="num">Tn. Lapangan</th><th class="num">Total Gaji</th><th class="ctr">Hari Kerja</th><th class="num">Gaji Prorata</th><th></th></tr></thead>
+            <tbody id="resignBody"></tbody><tfoot id="resignFoot"></tfoot>
           </table></div>
         </div>
       </section>
@@ -905,6 +919,28 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
     <div class="field"><label>Keterangan</label><input id="hNote" placeholder="Opsional"></div>
   </div></div>
   <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mPhk')">Batal</button><button class="btn btn-danger" type="submit">Simpan PHK</button></div></form>
+</div></div>
+
+<div class="modal" id="mResign"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="mResignTitle">Catat Karyawan Resign</h3><div class="sub">Status karyawan otomatis diubah menjadi Resign. Payroll bulan resign tetap bisa diinput.</div></div><button class="x" onclick="closeModal('mResign')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="resignForm"><div class="modal-body"><div class="grid g2">
+    <input type="hidden" id="sId">
+    <div class="field full"><label>Karyawan *</label><select id="sEmp" required></select></div>
+    <div class="field"><label>Tanggal Resign *</label><input id="sDate" type="date" required></div>
+    <div class="field"><label>Masa Kerja s/d Tgl. Resign</label><input id="sTenure" readonly placeholder="-"></div>
+    <div class="field"><label>Gaji Pokok (Rp)</label><input id="sGp" type="number" min="0" value="0"></div>
+    <div class="field"><label>Tunjangan Lapangan (Rp)</label><input id="sTl" type="number" min="0" value="0"></div>
+    <div class="field full"><div class="hint" id="sHint">Terisi otomatis dari payroll terakhir, bisa dikoreksi.</div></div>
+    <div class="field full"><label>Keterangan</label><input id="sNote" placeholder="Opsional"></div>
+  </div>
+  <div class="preview">
+    <div class="row"><span>Total Gaji (Gaji Pokok + Tunjangan)</span><b class="num" id="sTotal">0</b></div>
+    <div class="row"><span>Jumlah hari dalam bulan resign</span><b class="num" id="sMonthDays">-</b></div>
+    <div class="row"><span>Jumlah hari s/d tanggal resign</span><b class="num" id="sWorkDays">-</b></div>
+    <div class="row small" id="sFormula"></div>
+    <div class="row total"><span>Gaji Prorata</span><span class="num" id="sProrata">Rp 0</span></div>
+  </div></div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mResign')">Batal</button><button class="btn btn-amber" type="submit">Simpan Resign</button></div></form>
 </div></div>
 
 <div class="modal" id="mBpjs"><div class="modal-box wide">
@@ -1121,18 +1157,20 @@ function tenure(start, end) {
   return { y, m, d, days: (Date.UTC(+b[1], +b[2] - 1, +b[3]) - Date.UTC(+a[1], +a[2] - 1, +a[3])) / 864e5 };
 }
 const tenureText = t => t ? `${t.y} Tahun ${t.m} Bulan ${t.d} Hari` : '-';
-const empEnd = e => (e && e.status === 'PHK' && state.phkDates[e.empId]) || undefined;
+const empEnd = e => (e && e.status === 'PHK' && state.phkDates[e.empId]) || (e && e.status === 'Resign' && state.resignDates[e.empId]) || undefined;
 const empTenure = e => tenure(e && e.startDate, empEnd(e));
 
 const state = {
   token: null, user: null, tab: 'dashboard', period: '',
   settings: {}, employees: [], payroll: [], dashboard: null, batches: [],
-  kasbon: [], raises: [], phk: [], phkDates: {}, tax: { ptkp: {}, cat: {}, ter: {} }, summary: null, rptSel: new Set(), kasbonSaldo: [], raIds: [],
+  kasbon: [], raises: [], phk: [], phkDates: {}, resign: [], resignDates: {}, tax: { ptkp: {}, cat: {}, ter: {} }, summary: null, rptSel: new Set(), kasbonSaldo: [], raIds: [],
   statuses: ['PKWTT','PKWT','Probation','Resign','Dirumahkan','PHK'], activeStatuses: ['PKWTT','PKWT','Probation'],
   bulkRows: null
 };
 const empById = id => state.employees.find(e => e.empId === id);
 const isActive = e => e && state.activeStatuses.includes(e.status);
+/* Boleh input payroll periode aktif: status aktif, atau Resign/PHK pada periode ini atau sesudahnya (gaji bulan terakhir). */
+const canPay = e => isActive(e) || (!!empEnd(e) && empEnd(e).slice(0, 7) >= state.period);
 
 function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
 function setLoading(on) { $('#loading').classList.toggle('on', !!on); }
@@ -1245,7 +1283,8 @@ async function refresh() {
   Object.assign(state, {
     settings: d.settings, employees: d.employees, payroll: d.payroll, dashboard: d.dashboard, batches: d.batches,
     statuses: d.statuses, activeStatuses: d.activeStatuses, kasbon: d.kasbon || [], raises: d.raises || [], phk: d.phk || [],
-    phkDates: d.phkDates || {}, tax: d.tax || state.tax, summary: d.summary || null, kasbonSaldo: d.kasbonSaldo || []
+    phkDates: d.phkDates || {}, tax: d.tax || state.tax, summary: d.summary || null, kasbonSaldo: d.kasbonSaldo || [],
+    resign: d.resign || [], resignDates: d.resignDates || {}
   });
   $('#coName').textContent = state.settings.COMPANY_NAME || 'PT. Prohaba Jaya Mandiri';
   renderAll();
@@ -1386,8 +1425,9 @@ function renderEmpTable() {
   }).join('') : emptyRow(10, 'Tidak ada karyawan yang cocok.', 'users');
 }
 
-function openEmp(id) {
-  const e = empById(id) || { status: 'PKWT' };
+/** startDate: tanggal mulai bawaan untuk karyawan baru (dipakai tombol di halaman Mutasi). */
+function openEmp(id, startDate) {
+  const e = empById(id) || { status: 'PKWT', startDate: startDate || '' };
   $('#mEmpTitle').textContent = id ? 'Ubah Karyawan ' + id : 'Karyawan Baru';
   $('#eId').value = e.empId || ''; $('#eName').value = e.name || ''; $('#eEmail').value = e.email || '';
   $('#ePhone').value = e.phone || ''; $('#eStatus').value = e.status || 'PKWT'; $('#eDept').value = e.dept || '';
@@ -1507,7 +1547,7 @@ async function applyRecalc() {
 }
 
 function openPay() {
-  const act = state.employees.filter(isActive);
+  const act = state.employees.filter(canPay);
   if (!act.length) return toast('Belum ada karyawan aktif di Master Data.', 'err');
   $('#payFormPeriod').textContent = periodLabel(state.period);
   $('#pEmp').innerHTML = empOptions(act, '-- pilih karyawan --'); $('#pEmp').disabled = false;
@@ -1860,6 +1900,7 @@ function pdfTable({ title, sub, stats, cols, rows, note, file }) {
       ...cols.map(x => x.k ? (r[x.k] == null ? '-' : nf(r[x.k]) + (x.flag && r[x.flag] ? ' *' : '')) : String(x.f(r)))]),
     foot: [['', 'TOTAL (' + rows.length + ' karyawan)', '', ...cols.map(x => x.k ? nf(rsum(rows, x.k)) : '')]],
     footStyles: { fillColor: [209, 250, 229], textColor: [6, 95, 70], fontStyle: 'bold', halign: 'right' },
+    alternateRowStyles: { fillColor: [239, 244, 251] },   // baris berselang warna tipis agar mudah dibaca
     columnStyles: colStyles,
     didDrawPage: d => { if (d.pageNumber > 1) pdfHeader(doc, title, sub); }
   });
@@ -2134,6 +2175,15 @@ function renderMutasi() {
     <td class="acts"><button class="btn btn-ghost btn-sm btn-icon" title="Ubah" onclick="openPhk('${esc(h.id)}')">${ic('edit')}</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delPhk('${esc(h.id)}')">${ic('trash')}</button></td></tr>`; }).join('')
     : emptyRow(11, 'Tidak ada karyawan PHK pada periode ini.', 'ux');
   $('#phkFoot').innerHTML = H.length ? `<tr><td colspan="9">Jumlah &raquo; ${H.length} karyawan</td><td class="num">${nf(sum(H, 'amount'))}</td><td></td></tr>` : '';
+  // Resign
+  const Z = state.resign.slice().sort((a, b) => a.resignDate.localeCompare(b.resignDate) || a.name.localeCompare(b.name));
+  $('#resignBody').innerHTML = Z.length ? Z.map((z, i) => { const e = empById(z.empId) || {}; return `<tr><td>${i + 1}</td>
+    <td><span class="cell-main">${esc(z.name)}</span><div class="small mono">${esc(z.empId)}</div>${z.note ? `<div class="small">${esc(z.note)}</div>` : ''}</td><td>${esc(e.position) || '-'}</td>
+    <td class="nowrap">${fmtDate(e.startDate)}</td><td class="nowrap">${fmtDate(z.resignDate)}</td><td class="tenure">${tenureText(tenure(e.startDate, z.resignDate))}</td><td>${esc(e.jobSite) || '-'}</td>
+    <td class="num">${nf(z.gp)}</td><td class="num">${nf(z.tl)}</td><td class="num">${nf(z.total)}</td><td class="ctr nowrap">${z.workDays} / ${z.monthDays} hari</td><td class="num c-orange">${nf(z.prorata)}</td>
+    <td class="acts"><button class="btn btn-ghost btn-sm btn-icon" title="Ubah" onclick="openResign('${esc(z.id)}')">${ic('edit')}</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delResign('${esc(z.id)}')">${ic('trash')}</button></td></tr>`; }).join('')
+    : emptyRow(13, 'Tidak ada karyawan resign pada periode ini.', 'logout');
+  $('#resignFoot').innerHTML = Z.length ? `<tr><td colspan="7">Jumlah &raquo; ${Z.length} karyawan</td><td class="num">${nf(sum(Z, 'gp'))}</td><td class="num">${nf(sum(Z, 'tl'))}</td><td class="num">${nf(sum(Z, 'total'))}</td><td></td><td class="num c-orange">${nf(sum(Z, 'prorata'))}</td><td></td></tr>` : '';
 }
 
 /* Naik gaji */
@@ -2204,6 +2254,50 @@ $('#phkForm').addEventListener('submit', async e => {
     rights: $$('#hRights input:checked').map(c => c.value), amount: $('#hAmt').value, note: $('#hNote').value }));
   if (r) { closeModal('mPhk'); toast('Data PHK ' + r.name + ' tersimpan.', 'ok'); refresh(); }
 });
+/* Resign: gaji prorata = (Gaji Pokok + Tunjangan) / hari dalam bulan x hari s/d tgl. resign */
+function openResign(id) {
+  const z = state.resign.find(x => x.id === id);
+  const list = state.employees.filter(e => isActive(e) || (z && e.empId === z.empId));
+  if (!list.length) return toast('Belum ada karyawan aktif di Master Data.', 'err');
+  $('#mResignTitle').textContent = z ? 'Ubah Data Resign' : 'Catat Karyawan Resign';
+  $('#sEmp').innerHTML = empOptions(list, '-- pilih karyawan --');
+  $('#sId').value = z ? z.id : ''; $('#sEmp').value = z ? z.empId : ''; $('#sEmp').disabled = !!z;
+  const today = todayISO();
+  $('#sDate').value = z ? z.resignDate : (today.slice(0, 7) === state.period ? today : state.period + '-01');
+  $('#sGp').value = z ? z.gp : 0; $('#sTl').value = z ? z.tl : 0; $('#sNote').value = z ? z.note : '';
+  $('#sHint').textContent = 'Terisi otomatis dari payroll terakhir, bisa dikoreksi.';
+  syncResign(); openModal('mResign');
+}
+function syncResign() {
+  const e = empById($('#sEmp').value), d = $('#sDate').value;
+  $('#sTenure').value = e && d ? tenureText(tenure(e.startDate, d)) : '-';
+  const total = (+$('#sGp').value || 0) + (+$('#sTl').value || 0);
+  $('#sTotal').textContent = nf(total);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { $('#sMonthDays').textContent = $('#sWorkDays').textContent = '-'; $('#sFormula').textContent = ''; $('#sProrata').textContent = rp(0); return; }
+  const md = new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7), 0)).getUTCDate(), wd = +d.slice(8, 10);
+  $('#sMonthDays').textContent = md + ' hari'; $('#sWorkDays').textContent = wd + ' hari';
+  $('#sFormula').textContent = `${nf(total)} ÷ ${md} × ${wd}`;
+  $('#sProrata').textContent = rp(Math.round(total / md * wd));
+}
+['sGp', 'sTl', 'sDate'].forEach(i => $('#' + i).addEventListener('input', syncResign));
+$('#sEmp').addEventListener('change', async () => {
+  syncResign();
+  const id = $('#sEmp').value; if (!id || $('#sId').value) return;
+  const r = await safe(() => api('lastSalary', { period: state.period, empId: id }, { silent: true }));
+  if (r) { $('#sGp').value = r.gp || 0; $('#sTl').value = r.tl || 0; $('#sHint').textContent = r.period ? `Dari payroll ${periodLabel(r.period)}, bisa dikoreksi.` : 'Belum ada riwayat payroll, isi manual.'; syncResign(); }
+});
+$('#resignForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const emp = empById($('#sEmp').value);
+  if (!$('#sId').value && emp && !await ask(`Simpan resign untuk ${emp.name}?\nStatus karyawan akan diubah menjadi Resign.`)) return;
+  const r = await safe(() => api('saveResign', { id: $('#sId').value, empId: $('#sEmp').value, resignDate: $('#sDate').value, gp: $('#sGp').value, tl: $('#sTl').value, note: $('#sNote').value }));
+  if (r) { closeModal('mResign'); toast(`Resign ${r.name} tersimpan. Gaji prorata ${rp(r.prorata)}.`, 'ok'); refresh(); }
+});
+async function delResign(id) {
+  if (!await ask('Hapus data resign ini?\nCatatan: status karyawan TIDAK otomatis dikembalikan. Ubah manual di Master Karyawan bila perlu.')) return;
+  const r = await safe(() => api('deleteResign', { id })); if (r) { toast('Data resign dihapus.', 'ok'); refresh(); }
+}
+
 async function delPhk(id) {
   if (!await ask('Hapus data PHK ini?\nCatatan: status karyawan TIDAK otomatis dikembalikan. Ubah manual di Master Karyawan bila perlu.')) return;
   const r = await safe(() => api('deletePhk', { id })); if (r) { toast('Data PHK dihapus.', 'ok'); refresh(); }
