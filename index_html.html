@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base target="_top">
+<title>E-PAYROLL PJM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0a1f3c; --navy-2:#112b52; --blue:#0b63b6; --blue-d:#09529a; --blue-50:#eaf3fc; --sky:#00a6e0;
+  --green:#12904f; --green-50:#e7f6ee; --lime:#7cc242; --orange:#ea8414; --orange-50:#fff3e2;
+  --red:#d33a3a; --red-50:#fdeeee; --violet:#6d4ed8; --violet-50:#f1edfd;
+  --bg:#f3f5f9; --surface:#fff; --line:#e3e8ef; --line-2:#eef1f6; --ink:#0f1b2d; --ink-2:#334155; --muted:#66758b;
+  --radius:14px; --shadow-sm:0 1px 2px rgba(16,24,40,.05); --shadow:0 12px 32px -14px rgba(16,24,40,.25),0 2px 6px rgba(16,24,40,.06);
+  --sidebar:256px;
+  --f-head:'Plus Jakarta Sans',Inter,system-ui,sans-serif; --f-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.45;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button{font-family:inherit}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.mono{font-family:var(--f-mono);font-size:12px}
+.ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:15px;height:15px}
+.stripe{height:3px;background:linear-gradient(90deg,var(--lime) 0 25%,var(--orange) 25% 50%,var(--sky) 50% 75%,var(--blue) 75%)}
+.muted{color:var(--muted)} .small{font-size:12px;color:var(--muted)} .nowrap{white-space:nowrap}
+.c-green{color:var(--green);font-weight:700}.c-orange{color:var(--orange);font-weight:700}.c-red{color:var(--red)}.c-blue{color:var(--blue);font-weight:700}
+
+/* ---------- Buttons & form ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:10px;padding:0 14px;height:38px;font-weight:600;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s,transform .1s;white-space:nowrap;color:var(--ink);background:#fff}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,99,182,.25)}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 2px rgba(11,99,182,.4)}
+.btn-primary:hover:not(:disabled){background:var(--blue-d)}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover:not(:disabled){background:#0e7a43}
+.btn-amber{background:var(--orange);color:#fff}.btn-amber:hover:not(:disabled){background:#d27510}
+.btn-ghost{background:#fff;border-color:var(--line);color:var(--ink-2)}
+.btn-ghost:hover:not(:disabled){background:#f7f9fc;border-color:#cfd7e3}
+.btn-danger{background:var(--red-50);color:var(--red)}.btn-danger:hover{background:#fbdcdc}
+.btn-soft{background:var(--blue-50);color:var(--blue)}.btn-soft:hover{background:#dcebfa}
+.btn-sm{height:30px;padding:0 10px;font-size:12px;border-radius:8px;gap:5px}
+.btn-icon{width:38px;padding:0}
+.btn-sm.btn-icon{width:30px}
+label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+input,select,textarea{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 12px;height:40px;outline:none;transition:border-color .15s,box-shadow .15s}
+textarea{height:auto;padding:10px 12px;min-height:70px;resize:vertical}
+select{padding-right:30px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2366758b' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(11,99,182,.14)}
+input[type=number],input.money{font-variant-numeric:tabular-nums;text-align:right}
+input[type=file]{padding:7px 10px;height:auto}
+input[readonly]{background:#f5f7fa;color:var(--ink-2)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.field.full{grid-column:1/-1}
+.hint{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+.callout{display:flex;gap:10px;align-items:flex-start;background:var(--blue-50);color:#0b4a86;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5}
+.callout.warn{background:var(--orange-50);color:#8a4a05}
+.callout .ic{margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip-check{position:relative}
+.chip-check input{position:absolute;opacity:0;pointer-events:none}
+.chip-check span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:12.5px;font-weight:500;cursor:pointer;background:#fff;color:var(--ink-2);transition:.15s}
+.chip-check input:checked+span{background:var(--blue-50);border-color:var(--blue);color:var(--blue);font-weight:600}
+.chip-check input:focus-visible+span{box-shadow:0 0 0 3px rgba(11,99,182,.2)}
+
+/* ---------- Login ---------- */
+#loginView{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:#fff}
+.login-hero{position:relative;overflow:hidden;color:#fff;padding:44px 52px;display:flex;flex-direction:column;justify-content:space-between;gap:40px;
+  background:radial-gradient(700px 420px at 110% 110%,rgba(0,166,224,.35),transparent 60%),radial-gradient(600px 380px at -10% -10%,rgba(124,194,66,.22),transparent 60%),linear-gradient(150deg,var(--navy),var(--navy-2) 60%,#0d3a72)}
+.login-hero::after{content:"";position:absolute;inset:auto -120px -160px auto;width:420px;height:420px;border-radius:50%;border:60px solid rgba(255,255,255,.04)}
+.hero-brand{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.hero-brand .logo-tile{width:56px;height:56px;border-radius:14px}.hero-brand .logo-tile img{width:46px;height:46px}
+.hero-brand b{display:block;font-family:var(--f-head);font-size:19px;font-weight:800;letter-spacing:.3px}
+.hero-brand span{font-size:12.5px;color:#a9bad3}
+.hero-copy{position:relative;z-index:1;max-width:460px}
+.hero-copy h1{font-family:var(--f-head);font-size:34px;line-height:1.15;margin:0 0 14px;font-weight:800;letter-spacing:-.5px}
+.hero-copy h1 em{font-style:normal;background:linear-gradient(90deg,#9fe06a,#38c4f2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-copy p{color:#b8c7dc;margin:0 0 22px;font-size:14.5px;line-height:1.6}
+.hero-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hero-list li{display:flex;gap:10px;align-items:center;font-size:13.5px;color:#dbe5f2}
+.hero-list .ic{color:#7cc242;width:20px;height:20px;padding:3px;border-radius:6px;background:rgba(124,194,66,.15)}
+.hero-foot{position:relative;z-index:1;font-size:12px;color:#7f95b5}
+.login-side{display:grid;place-items:center;padding:32px 24px;background:#fff}
+.login-card{width:100%;max-width:380px}
+.login-card .logo-mobile{display:none;margin-bottom:24px}
+.logo-mobile span{color:var(--muted)!important}
+.login-card h2{font-family:var(--f-head);font-size:24px;margin:0 0 6px;font-weight:800}
+.login-card>p{margin:0 0 26px;color:var(--muted)}
+.login-card .field{margin-bottom:16px}
+.err{background:var(--red-50);color:var(--red);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:16px}
+.pw-wrap{position:relative}.pw-wrap input{padding-right:44px}
+.pw-wrap button{position:absolute;right:4px;top:4px;height:32px;width:36px;border:0;background:none;color:var(--muted);cursor:pointer;border-radius:8px}
+
+/* ---------- Brand bits ---------- */
+.logo-tile{width:42px;height:42px;border-radius:11px;background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 14px -4px rgba(0,0,0,.35)}
+.logo-tile img{width:34px;height:34px;display:block}
+
+/* ---------- Sidebar ---------- */
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:linear-gradient(180deg,var(--navy),#0b2244);color:#c3cfe0;display:flex;flex-direction:column;z-index:60;transition:transform .25s ease}
+.sb-brand{display:flex;gap:12px;align-items:center;padding:20px 18px}
+.sb-brand b{display:block;font-family:var(--f-head);font-weight:800;color:#fff;font-size:15.5px;letter-spacing:.3px}
+.sb-brand span{font-size:11.5px;color:#8ea3c0;display:block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav{flex:1;overflow-y:auto;padding:6px 12px 12px}
+.nav-label{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5f7698;padding:16px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:#bfcbdc;padding:9px 11px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;text-align:left;margin-bottom:2px;transition:background .15s,color .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(11,99,182,.85);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--sky),0 6px 16px -8px rgba(0,0,0,.5)}
+.nav-item .pill{margin-left:auto;background:rgba(234,132,20,.9);color:#fff;font-size:10.5px;font-weight:700;border-radius:99px;padding:1px 7px}
+.sb-foot{padding:10px 12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.overlay{position:fixed;inset:0;background:rgba(10,31,60,.45);backdrop-filter:blur(2px);z-index:55;display:none}
+
+/* ---------- Shell / topbar ---------- */
+.shell{margin-left:var(--sidebar);min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.9);backdrop-filter:saturate(1.5) blur(10px);-webkit-backdrop-filter:saturate(1.5) blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:12px 28px;min-height:66px}
+.hamb{display:none}
+.page-title{min-width:0}
+.page-title h1{font-family:var(--f-head);font-size:19px;margin:0;font-weight:800;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-title p{margin:1px 0 0;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.period{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:#fff;height:40px;overflow:hidden}
+.period button{border:0;background:none;height:100%;width:34px;cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.period button:hover{background:#f3f6fa;color:var(--ink)}
+.period .ic-cal{color:var(--blue);margin-left:2px}
+.period input{border:0;height:100%;width:150px;padding:0 4px;font-weight:600;text-align:center;box-shadow:none!important;background:transparent}
+.user{position:relative}
+.user-btn{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:#fff;border-radius:10px;height:40px;padding:0 10px 0 5px;cursor:pointer}
+.user-btn:hover{background:#f7f9fc}
+.avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+.user-btn .nm{font-size:13px;font-weight:600;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu{position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:210px;padding:6px;display:none;z-index:70}
+.menu.open{display:block}
+.menu .who{padding:8px 10px 10px;border-bottom:1px solid var(--line-2);margin-bottom:4px}
+.menu .who b{display:block;font-size:13px}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:9px 10px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--ink-2);text-align:left}
+.menu button:hover{background:#f3f6fa;color:var(--ink)}
+.menu button.danger{color:var(--red)}
+main{padding:24px 28px 56px;width:100%;max-width:1640px;margin:0 auto;flex:1}
+.page{animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}}
+
+/* ---------- Cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);min-width:0}
+.card+.card{margin-top:18px}
+.card-head{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:16px 18px}
+.card-head.bordered{border-bottom:1px solid var(--line-2)}
+.card-head h3{font-family:var(--f-head);font-size:15.5px;margin:0;font-weight:700;display:flex;align-items:center;gap:9px}
+.card-head h3 .hi{width:30px;height:30px;border-radius:8px;display:grid;place-items:center}
+.card-head .sub{color:var(--muted);font-size:12.5px}
+.card-head .sp{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.card-body{padding:16px 18px}
+.toolbar{display:grid;grid-template-columns:minmax(220px,2fr) repeat(4,minmax(0,1fr));gap:10px;padding:0 18px 16px}
+.toolbar.t3{grid-template-columns:minmax(220px,2fr) minmax(0,1fr)}
+.toolbar.t4{grid-template-columns:minmax(220px,2fr) minmax(0,1fr) minmax(0,1fr)}
+.stats.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat .cmp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--muted)}
+.stat.hero .cmp{color:#a9bcd6}
+.delta{display:inline-flex;align-items:center;gap:3px;font-weight:700;font-size:11.5px;border-radius:99px;padding:1px 7px}
+.delta.up{background:var(--green-50);color:#0e7340}.delta.down{background:var(--red-50);color:var(--red)}.delta.eq{background:#eef1f5;color:#56657c}
+.stat.hero .delta.up{background:rgba(124,194,66,.18);color:#b8ef8f}.stat.hero .delta.down{background:rgba(255,120,120,.18);color:#ffb3b3}
+.b-draft{background:#fff1d6;color:#a35b00;border:1px dashed #f0b44c}.b-final{background:var(--green-50);color:#0e7340}
+.b-manual{background:var(--violet-50);color:var(--violet);font-size:10px}
+.cmp-table td.lbl{font-weight:600}
+.cmp-table th.cur,.cmp-table td.cur{background:#f2f7fe}
+.sel-col{width:36px;text-align:center}
+.sel-col input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+.radio-list{display:grid;gap:8px}
+.radio-list label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0;cursor:pointer;font-weight:500;color:var(--ink)}
+.radio-list label:has(input:checked){border-color:var(--blue);background:var(--blue-50)}
+.radio-list input{width:16px;height:16px;margin-top:2px;accent-color:var(--blue)}
+.radio-list small{display:block;color:var(--muted);font-weight:400}
+.check-line{display:flex;gap:10px;align-items:center;font-weight:500;color:var(--ink);margin:0;cursor:pointer}
+.check-line input{width:16px;height:16px;accent-color:var(--blue)}
+.auto-hint{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px;font-size:12px;color:var(--muted)}
+.link-btn{border:0;background:none;color:var(--blue);font-weight:600;font-size:12px;cursor:pointer;padding:0}
+.search{position:relative}.search .ic{position:absolute;left:12px;top:11px;color:var(--muted)}.search input{padding-left:38px}
+.hi-blue{background:var(--blue-50);color:var(--blue)}.hi-green{background:var(--green-50);color:var(--green)}
+.hi-orange{background:var(--orange-50);color:var(--orange)}.hi-red{background:var(--red-50);color:var(--red)}.hi-violet{background:var(--violet-50);color:var(--violet)}
+
+/* ---------- Stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stat .lbl{font-size:12.5px;color:var(--muted);font-weight:600}
+.stat .chip{width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.stat .val{font-family:var(--f-head);font-size:23px;font-weight:800;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .val small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
+.stat .foot{font-size:12px;color:var(--muted);margin-top:4px}
+.stat.hero{background:linear-gradient(140deg,var(--navy),#0d3a72);border-color:transparent;color:#fff}
+.stat.hero .lbl,.stat.hero .foot{color:#a9bcd6}.stat.hero .chip{background:rgba(255,255,255,.12);color:#fff}
+.mini{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.mini>div{padding:14px 18px;border-top:1px solid var(--line-2);border-left:1px solid var(--line-2)}
+.mini>div:nth-child(4n+1){border-left:0}
+.mini .k{font-size:12px;color:var(--muted);font-weight:500}
+.mini .v{font-family:var(--f-head);font-weight:700;font-size:17px;margin-top:3px}
+.mini .s{font-size:11.5px;color:var(--muted)}
+.bar{height:6px;background:#edf1f6;border-radius:99px;overflow:hidden;margin-top:7px}
+.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--sky))}
+
+/* ---------- Tables ---------- */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.card>.table-wrap{border-top:1px solid var(--line-2);border-radius:0 0 var(--radius) var(--radius)}
+.table-wrap.boxed{border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+thead th{background:#f7f9fc;color:#56657c;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.45px;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:bottom}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#fafbfd}
+tfoot td{background:#f7f9fc;font-weight:700;padding:12px 14px;border-top:1px solid var(--line)}
+td.num,th.num{text-align:right;white-space:nowrap}
+td.ctr,th.ctr{text-align:center}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.empty .ic{width:34px;height:34px;color:#b5c1d1;display:block;margin:0 auto 10px}
+.cell-main{font-weight:600;color:var(--ink);white-space:nowrap}
+td.mono,td .mono{white-space:nowrap}
+.acts{white-space:nowrap;text-align:right}
+.acts .btn+.btn{margin-left:4px}
+/* tabel payroll (header bertingkat) */
+.pay-table thead th{text-align:center;vertical-align:middle}
+.pay-table thead th.l{text-align:left}
+.pay-table th.grp{font-size:10.5px;letter-spacing:.7px;padding:8px 10px}
+.pay-table .bl{border-left:1px solid var(--line)}
+.pay-table td{padding:9px 10px}
+.pay-table thead th{padding:9px 10px}
+.g-in{background:#ecf4fd!important;color:#0b4f91!important}
+.g-tot{background:#e3eefb!important;color:#0b4f91!important}
+.g-kas{background:#fff4e6!important;color:#99560a!important}
+.g-out{background:#fdf0f0!important;color:#a12a2a!important}
+.g-outt{background:#fbe6e6!important;color:#a12a2a!important}
+.g-net{background:#e6f5ec!important;color:#0e7340!important}
+td.tot-in{background:#f5f9fe;font-weight:600}
+td.tot-out{background:#fdf7f7;font-weight:600;color:#a12a2a}
+td.net{background:#f2faf5;font-weight:700;color:var(--green)}
+.sticky-col{position:sticky;left:0;z-index:1;background:#fff;box-shadow:inset -1px 0 0 var(--line)}
+thead .sticky-col{z-index:3;background:#f7f9fc}
+tfoot .sticky-col{background:#f7f9fc}
+tbody tr:hover .sticky-col{background:#fafbfd}
+/* Freeze header (atas) + total (bawah) pada tabel panjang; kolom kiri tetap freeze lewat .sticky-col */
+.table-wrap.fz{max-height:calc(100vh - 150px);overflow:auto}
+.fz thead th{position:sticky;top:0;z-index:2}
+.fz thead th.sticky-col{z-index:5}
+.fz tfoot td{position:sticky;bottom:0;z-index:2;box-shadow:0 -1px 0 var(--line)}
+.fz tfoot td.sticky-col{z-index:5}
+.fz tbody .sticky-col{z-index:1}
+/* Sub-menu sidebar */
+.nav-sub{position:relative;margin:0 0 6px}
+.nav-sub::before{content:"";position:absolute;left:21px;top:2px;bottom:6px;width:1px;background:rgba(255,255,255,.12)}
+.nav-item.sub{padding:7px 11px 7px 40px;font-size:12.8px;color:#a9b8cc;position:relative}
+.nav-item.sub::before{content:"";position:absolute;left:18px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:#3d5679;box-shadow:0 0 0 3px var(--navy)}
+.nav-item.sub.active{background:rgba(255,255,255,.08);color:#fff;box-shadow:none}
+.nav-item.sub.active::before{background:var(--sky)}
+.nav-item.parent-on{color:#fff;background:rgba(255,255,255,.05)}
+.rule-table td{padding:8px 10px}.rule-table input{height:34px}.rule-table select{height:32px;font-size:12px}
+
+/* ---------- Badges ---------- */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;line-height:1.4}
+.st-PKWTT{background:var(--green-50);color:#0e7340}.st-PKWT{background:var(--blue-50);color:#0b56a0}
+.st-Probation{background:var(--orange-50);color:#9a560a}.st-Resign{background:#edf0f4;color:#4a5a70}
+.st-Dirumahkan{background:#ffedd5;color:#c2410c}.st-PHK{background:var(--red-50);color:var(--red)}
+.b-GAJI{background:var(--green-50);color:#0e7340}
+.b-dup{background:var(--violet-50);color:var(--violet)}.b-src{background:#eef1f5;color:#56657c;font-weight:600;font-size:10px;letter-spacing:.4px}
+.b-pending{background:var(--orange-50);color:#9a560a}.b-cair{background:var(--green-50);color:#0e7340}
+.b-ptkp{background:#eef1f5;color:#334155}.b-na{background:var(--red-50);color:var(--red)}
+.tenure{font-size:12.5px;white-space:nowrap}
+.tenure b{font-weight:700}
+
+/* ---------- Batch ---------- */
+.bank-card{border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:14px;overflow:hidden}
+.bank-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;background:#f7f9fc;border-bottom:1px solid var(--line)}
+.bank-head h4{margin:0;font-size:15px;font-weight:800;font-family:var(--f-head);display:flex;align-items:center;gap:8px}
+.bank-head .sp{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.batch{padding:0 16px 14px}
+.batch-title{display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px;font-weight:700;font-size:13px}
+.warn{background:var(--orange-50);color:#8a4a05;border-radius:8px;padding:7px 10px;font-size:12px;margin-bottom:8px}
+
+/* ---------- Modal / toast / loading ---------- */
+.modal{position:fixed;inset:0;background:rgba(10,31,60,.5);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:48px 16px;overflow-y:auto;z-index:100}
+.modal.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;width:100%;max-width:620px;box-shadow:0 30px 70px -20px rgba(0,0,0,.45);overflow:hidden;animation:pop .18s ease}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.modal-box.wide{max-width:860px}.modal-box.xs{max-width:420px}
+.modal-head{padding:18px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line-2)}
+.modal-head h3{margin:0;font-size:16px;font-weight:800;font-family:var(--f-head)}
+.modal-head .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.modal-head .x{margin-left:auto;background:#f3f6fa;border:none;color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;display:grid;place-items:center}
+.modal-head .x:hover{background:#e8edf3;color:var(--ink)}
+.modal-body{padding:20px 22px}
+.modal-foot{padding:14px 22px;background:#f7f9fc;border-top:1px solid var(--line-2);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.sec-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:4px 0 10px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.preview{background:#f7faff;border:1px solid #d7e6f7;border-radius:12px;padding:14px 16px;margin-top:16px}
+.preview .row{display:flex;justify-content:space-between;gap:12px;padding:3px 0;font-size:13px}
+.preview .row.total{border-top:1px dashed #b7cfe9;margin-top:8px;padding-top:9px;font-weight:800;font-size:15px;color:var(--green)}
+.rule{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.rule:last-child{border:none}
+.rule i{flex:none;width:26px;height:26px;border-radius:8px;background:var(--blue-50);color:var(--blue);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:12px}
+.rule b{display:block;font-size:13px}.rule code{display:block;margin-top:4px;font-family:var(--f-mono);font-size:12px;color:#334155;background:#f3f6fa;padding:6px 9px;border-radius:7px;white-space:pre-wrap}
+.stepbox{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;background:#fbfcfe}
+.stepbox h5{margin:0 0 10px;font-size:13.5px;display:flex;align-items:center;gap:8px}
+.stepbox h5 .n{width:22px;height:22px;border-radius:6px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:11.5px}
+.resultbox{border-radius:10px;padding:12px;font-size:13px;margin-top:10px}
+.resultbox.ok{background:var(--green-50);color:#0b5f36}
+.resultbox ul{margin:6px 0 0;padding-left:18px;max-height:150px;overflow:auto}
+.ref h4{font-family:var(--f-head);font-size:14px;margin:18px 0 8px}
+.ref h4:first-child{margin-top:0}
+.ref table{font-size:12.5px}
+.ref td,.ref th{padding:7px 10px}
+details.ter{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden}
+details.ter summary{cursor:pointer;padding:10px 12px;font-weight:600;font-size:13px;background:#f7f9fc}
+details.ter .table-wrap{max-height:280px;overflow:auto}
+.law{margin:0;padding-left:18px;font-size:12.5px;line-height:1.7;color:var(--ink-2)}
+#toast{position:fixed;bottom:22px;right:22px;z-index:300;display:flex;flex-direction:column;gap:8px;max-width:calc(100vw - 32px)}
+.toast{display:flex;gap:10px;align-items:flex-start;background:var(--navy);color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-weight:500;font-size:13px;max-width:380px;animation:pop .2s}
+.toast.err{background:var(--red)}.toast.ok{background:var(--green)}
+#loading{position:fixed;inset:0;background:rgba(243,245,249,.55);backdrop-filter:blur(1.5px);display:none;place-items:center;z-index:400}
+#loading.on{display:grid}
+.spin{width:44px;height:44px;border-radius:50%;border:4px solid #d5deea;border-top-color:var(--blue);animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------- Responsive ---------- */
+@media(max-width:1280px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{grid-template-columns:1fr 1fr 1fr}.toolbar .search{grid-column:1/-1}}
+@media(max-width:1100px){
+  .sidebar{transform:translateX(-100%);box-shadow:none}
+  body.nav-open .sidebar{transform:none;box-shadow:20px 0 50px -10px rgba(0,0,0,.4)}
+  body.nav-open .overlay{display:block}
+  .shell{margin-left:0}
+  .hamb{display:inline-flex}
+  .g2.cols{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+  #loginView{grid-template-columns:1fr}
+  .login-hero{display:none}
+  .login-card .logo-mobile{display:flex}
+  .mini{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mini>div:nth-child(4n+1){border-left:1px solid var(--line-2)}
+  .mini>div:nth-child(2n+1){border-left:0}
+}
+@media(max-width:720px){
+  .table-wrap.fz{max-height:72vh}
+  .topbar{flex-wrap:wrap;padding:10px 14px;gap:10px;min-height:0}
+  .page-title{flex:1}
+  .page-title p{display:none}
+  .top-right{margin-left:0;width:100%;order:3}
+  .period{flex:1}.period input{flex:1;width:auto}
+  .user-btn .nm{display:none}
+  main{padding:16px 12px 48px}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:14px}.stat .val{font-size:18px}.stat .chip{width:30px;height:30px}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .toolbar.t4{grid-template-columns:1fr 1fr}.toolbar.t4 .search{grid-column:1/-1}
+  .toolbar{grid-template-columns:1fr 1fr;padding:0 14px 14px}
+  .card-head{padding:14px}
+  .card-head .sp{margin-left:0;width:100%}
+  .card-head .sp .btn{flex:1 1 auto}
+  .modal{padding:0;align-items:flex-end}
+  .modal-box,.modal-box.wide,.modal-box.xs{max-width:none;border-radius:18px 18px 0 0;max-height:94vh;overflow-y:auto}
+  .modal-foot{position:sticky;bottom:0}
+  .modal-foot .btn{flex:1}
+  #toast{left:16px;right:16px;bottom:16px}
+}
+@media(max-width:1000px){.stats.s3{grid-template-columns:1fr}}
+@media(max-width:420px){.stats{grid-template-columns:1fr}.mini{grid-template-columns:1fr}.mini>div{border-left:0!important}}
+@media print{.sidebar,.topbar,.overlay{display:none}.shell{margin:0}}
+</style>
+</head>
+<body>
+
+<!-- ====================== ICON SPRITE ====================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></symbol>
+  <symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="M16.71 13.88l.7.71-2.82 2.82"/></symbol>
+  <symbol id="i-brief" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><path d="M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M16 3l4 4-4 4"/><path d="M20 7H4"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h16"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.35-4.35"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></symbol>
+  <symbol id="i-uplus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></symbol>
+  <symbol id="i-ux" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M18 8l5 5M23 8l-5 5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 3 2V2l-3 2-3-2-3 2-3-2-3 2z"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-sheet" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M12 11v8"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></symbol>
+</svg>
+
+<!-- ====================== LOGIN ====================== -->
+<div id="loginView">
+  <section class="login-hero">
+    <div class="hero-brand">
+      <div class="logo-tile"><img data-logo alt="Logo PT. Prohaba Jaya Mandiri"></div>
+      <div><b>E-PAYROLL PJM</b><span>PT. Prohaba Jaya Mandiri</span></div>
+    </div>
+    <div class="hero-copy">
+      <h1>Penggajian akurat,<br><em>transfer lebih rapi.</em></h1>
+      <p>Satu tempat untuk mengelola data karyawan, payroll, kasbon, laporan gaji, hingga batch transfer bank setiap periode.</p>
+      <ul class="hero-list">
+        <li><svg class="ic"><use href="#i-check"/></svg>Kalkulasi BPJS &amp; kasbon otomatis</li>
+        <li><svg class="ic"><use href="#i-check"/></svg>Batch transfer per bank dengan limit nominal</li>
+        <li><svg class="ic"><use href="#i-check"/></svg>Slip gaji &amp; laporan PDF siap cetak</li>
+      </ul>
+    </div>
+    <div class="hero-foot">&copy; <span id="yr"></span> PT. Prohaba Jaya Mandiri</div>
+  </section>
+  <section class="login-side">
+    <form class="login-card" id="loginForm" autocomplete="on">
+      <div class="logo-mobile hero-brand" style="color:var(--ink)">
+        <div class="logo-tile" style="box-shadow:0 0 0 1px var(--line)"><img data-logo alt=""></div>
+        <div><b style="font-family:var(--f-head);font-weight:800">E-PAYROLL PJM</b><span class="small">PT. Prohaba Jaya Mandiri</span></div>
+      </div>
+      <h2>Selamat datang</h2>
+      <p>Masuk untuk mengelola payroll, laporan gaji, dan transfer bank.</p>
+      <div id="loginErr" class="err" hidden></div>
+      <div class="field"><label for="lgUser">Username</label><input id="lgUser" autocomplete="username" required></div>
+      <div class="field"><label for="lgPass">Password</label>
+        <div class="pw-wrap"><input id="lgPass" type="password" autocomplete="current-password" required>
+          <button type="button" onclick="togglePw()" aria-label="Lihat password"><svg class="ic"><use href="#i-eye"/></svg></button></div></div>
+      <button class="btn btn-primary" id="lgBtn" style="width:100%;height:44px;margin-top:6px;font-size:14px" type="submit">Masuk</button>
+    </form>
+  </section>
+</div>
+
+<!-- ====================== APP ====================== -->
+<div id="appView" hidden>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="logo-tile"><img data-logo alt="Logo"></div>
+      <div><b>E-PAYROLL PJM</b><span id="coName">PT. Prohaba Jaya Mandiri</span></div>
+    </div>
+    <div class="stripe"></div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">Utama</div>
+      <button class="nav-item active" data-tab="dashboard"><svg class="ic"><use href="#i-home"/></svg>Dashboard</button>
+      <button class="nav-item" data-tab="employees"><svg class="ic"><use href="#i-users"/></svg>Master Karyawan</button>
+      <div class="nav-label">Penggajian</div>
+      <button class="nav-item nav-parent" data-tab="payroll" data-group="real"><svg class="ic"><use href="#i-card"/></svg>Gaji Real</button>
+      <div class="nav-sub">
+        <button class="nav-item sub" data-tab="payroll">Payroll</button>
+        <button class="nav-item sub" data-tab="kasbon">Kasbon<span class="pill" id="kasPill" hidden></span></button>
+        <button class="nav-item sub" data-tab="batch">Batch Transfer Bank</button>
+      </div>
+      <button class="nav-item" data-tab="rptKes"><svg class="ic"><use href="#i-shield"/></svg>Gaji BPJS</button>
+      <button class="nav-item" data-tab="rptTax"><svg class="ic"><use href="#i-receipt"/></svg>Gaji Pajak</button>
+      <button class="nav-item" data-tab="mutasi"><svg class="ic"><use href="#i-swap"/></svg>Mutasi Karyawan</button>
+    </nav>
+    <div class="sb-foot">
+      <button class="nav-item" onclick="openRules()"><svg class="ic"><use href="#i-book"/></svg>Aturan Kalkulasi</button>
+      <button class="nav-item" onclick="openSettings()"><svg class="ic"><use href="#i-gear"/></svg>Pengaturan</button>
+    </div>
+  </aside>
+  <div class="overlay" onclick="toggleNav(false)"></div>
+
+  <div class="shell">
+    <header class="topbar">
+      <button class="btn btn-ghost btn-icon hamb" onclick="toggleNav()" aria-label="Menu"><svg class="ic"><use href="#i-menu"/></svg></button>
+      <div class="page-title"><h1 id="pgTitle">Dashboard</h1><p id="pgSub"></p></div>
+      <div class="top-right">
+        <div class="period" title="Periode payroll">
+          <button type="button" onclick="shiftPeriod(-1)" aria-label="Periode sebelumnya"><svg class="ic ic-sm"><use href="#i-left"/></svg></button>
+          <svg class="ic ic-sm ic-cal"><use href="#i-cal"/></svg>
+          <input type="month" id="period" aria-label="Periode">
+          <button type="button" onclick="shiftPeriod(1)" aria-label="Periode berikutnya"><svg class="ic ic-sm"><use href="#i-right"/></svg></button>
+        </div>
+        <div class="user">
+          <button class="user-btn" onclick="toggleMenu(event)"><span class="avatar" id="avatar">A</span><span class="nm" id="userChip"></span><svg class="ic ic-sm muted"><use href="#i-down"/></svg></button>
+          <div class="menu" id="userMenu">
+            <div class="who"><b id="userName2"></b><span class="small" id="userLogin"></span></div>
+            <button onclick="openModal('mPass')"><svg class="ic"><use href="#i-key"/></svg>Ganti Password</button>
+            <button class="danger" onclick="doLogout()"><svg class="ic"><use href="#i-logout"/></svg>Keluar</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- DASHBOARD -->
+      <section id="tab-dashboard" class="page">
+        <div class="stats" id="metrics"></div>
+        <div class="stats s3" id="stats3" style="margin-top:16px"></div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-head bordered"><h3><span class="hi hi-blue"><svg class="ic ic-sm"><use href="#i-trend"/></svg></span>Realisasi Bulan Lalu vs Bulan Ini</h3><span class="sub" id="cmpNote"></span>
+            <div class="sp"><button class="btn btn-ghost btn-sm" onclick="showTab('rptKes')"><svg class="ic ic-sm"><use href="#i-shield"/></svg>Gaji BPJS</button><button class="btn btn-ghost btn-sm" onclick="showTab('rptTax')"><svg class="ic ic-sm"><use href="#i-receipt"/></svg>Gaji Pajak</button></div></div>
+          <div class="table-wrap"><table class="cmp-table"><thead id="cmpHead"></thead><tbody id="cmpBody"></tbody></table></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-head"><h3><span class="hi hi-violet"><svg class="ic ic-sm"><use href="#i-info"/></svg></span>Ringkasan Bulan <span id="dashPeriod"></span></h3></div>
+          <div class="mini" id="miniStats"></div>
+        </div>
+        <div class="grid g2 cols" style="margin-top:18px">
+          <div class="card"><div class="card-head"><h3><span class="hi hi-blue"><svg class="ic ic-sm"><use href="#i-bank"/></svg></span>Transfer per Bank Penerima</h3></div><div id="byBank"></div></div>
+          <div class="card" style="margin-top:0"><div class="card-head"><h3><span class="hi hi-green"><svg class="ic ic-sm"><use href="#i-brief"/></svg></span>Transfer per Job Site Proyek</h3></div><div id="bySite"></div></div>
+        </div>
+      </section>
+
+      <!-- EMPLOYEES -->
+      <section id="tab-employees" class="page" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h3>Master Data Karyawan</h3><span class="sub" id="empCount"></span>
+            <div class="sp">
+              <button class="btn btn-ghost" onclick="downloadEmpTemplate()"><svg class="ic ic-sm"><use href="#i-download"/></svg>Template CSV</button>
+              <button class="btn btn-ghost" onclick="openModal('mImport')"><svg class="ic ic-sm"><use href="#i-upload"/></svg>Import Sheets / CSV</button>
+              <button class="btn btn-primary" onclick="openEmp()"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Karyawan Baru</button>
+            </div>
+          </div>
+          <div class="toolbar">
+            <div class="search"><svg class="ic ic-sm"><use href="#i-search"/></svg><input id="fSearch" placeholder="Cari nama, ID, jabatan, bank, no rekening..."></div>
+            <select id="fDept"></select><select id="fSite"></select><select id="fStatus"></select>
+            <select id="fSort">
+              <option value="id-asc">ID Karyawan naik</option><option value="id-desc">ID Karyawan turun</option>
+              <option value="name-asc">Nama A-Z</option><option value="name-desc">Nama Z-A</option>
+              <option value="ten-desc">Masa kerja terlama</option><option value="ten-asc">Masa kerja terbaru</option>
+            </select>
+          </div>
+          <div class="table-wrap fz"><table>
+            <thead><tr><th>ID</th><th>Nama</th><th>Status</th><th>Departemen / Jabatan</th><th>Job Site</th><th>Bank / No Rekening</th><th>Mulai Kerja</th><th>Masa Kerja</th><th>PTKP</th><th></th></tr></thead>
+            <tbody id="empBody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- PAYROLL -->
+      <section id="tab-payroll" class="page" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h3>Daftar Gaji Periode <span id="payPeriodLbl"></span></h3><span class="sub" id="payCount"></span>
+            <div class="sp">
+              <button class="btn btn-success" id="btnConfirmAll" onclick="confirmAll()" title="Konfirmasi semua baris DRAFT"><svg class="ic ic-sm"><use href="#i-check"/></svg><span>Konfirmasi Semua (0)</span></button>
+              <button class="btn btn-ghost" onclick="openMove()" title="Pindahkan seluruh payroll periode ini ke periode lain"><svg class="ic ic-sm"><use href="#i-swap"/></svg>Pindah Periode</button>
+              <button class="btn btn-ghost" onclick="openCopy()"><svg class="ic ic-sm"><use href="#i-copy"/></svg>Salin dari Bulan Lalu</button>
+              <button class="btn btn-ghost" onclick="openBulk()"><svg class="ic ic-sm"><use href="#i-upload"/></svg>Bulk Payroll (CSV / Sheets)</button>
+              <button class="btn btn-ghost" onclick="exportPayXlsx()"><svg class="ic ic-sm"><use href="#i-sheet"/></svg>Excel</button>
+              <button class="btn btn-ghost" onclick="exportPayPdf()"><svg class="ic ic-sm"><use href="#i-file"/></svg>PDF</button>
+              <button class="btn btn-success" onclick="openPay()"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Input Payroll</button>
+            </div>
+          </div>
+          <div class="callout warn" id="payDraftNote" style="margin:0 18px 14px" hidden></div>
+          <div class="callout warn" id="payMismatch" style="margin:0 18px 14px;align-items:center" hidden></div>
+          <div class="toolbar t4">
+            <div class="search"><svg class="ic ic-sm"><use href="#i-search"/></svg><input id="payQ" placeholder="Cari nama, ID, bank..."></div>
+            <select id="paySite"></select>
+            <select id="payStatus"><option value="">Semua Status Data</option><option value="DRAFT">Draft (belum dikonfirmasi)</option><option value="FINAL">Final (sudah dikonfirmasi)</option></select>
+          </div>
+          <div class="table-wrap fz"><table class="pay-table">
+            <thead>
+              <tr>
+                <th rowspan="2" class="l sticky-col">Karyawan</th>
+                <th rowspan="2" class="l">Job Site</th>
+                <th colspan="3" class="grp g-in bl">Penghasilan Bruto (Kotor)</th>
+                <th rowspan="2" class="g-tot bl">Jumlah<br>Penghasilan</th>
+                <th colspan="2" class="grp g-kas bl">Perhitungan Kasbon</th>
+                <th colspan="4" class="grp g-out bl">Pengurang Perhitungan Penghasilan</th>
+                <th rowspan="2" class="g-outt bl">Jumlah<br>Pengurang</th>
+                <th rowspan="2" class="g-net bl">Penghasilan Bersih /<br>Gaji Bersih</th>
+                <th rowspan="2" class="bl"></th>
+              </tr>
+              <tr>
+                <th class="g-in bl">Gaji Pokok</th><th class="g-in">Tun. Lapangan</th><th class="g-in">THR</th>
+                <th class="g-kas bl">Sisa Ksbn<br>Bulan Lalu</th><th class="g-kas">Sisa Ksbn<br>Bulan Ini</th>
+                <th class="g-out bl">Pot. Kasbon</th><th class="g-out">JHT</th><th class="g-out">JP</th><th class="g-out">BPJS Kes.</th>
+              </tr>
+            </thead>
+            <tbody id="payBody"></tbody><tfoot id="payFoot"></tfoot>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- KASBON -->
+      <section id="tab-kasbon" class="page" hidden>
+        <div class="callout" style="margin-bottom:16px"><svg class="ic"><use href="#i-info"/></svg>
+          <div>Kasbon yang <b>cair</b> pada suatu bulan otomatis masuk ke <b>Sisa Kasbon Bulan Lalu</b> dan mulai dipotong pada <b>payroll bulan berikutnya</b>. Pencairan kasbon <b>tidak</b> masuk Batch Transfer Bank.</div></div>
+        <div class="card">
+          <div class="card-head bordered">
+            <h3><span class="hi hi-blue"><svg class="ic ic-sm"><use href="#i-coins"/></svg></span>Saldo Kasbon per Karyawan <span class="sub" style="font-weight:500">(<span class="kasPer"></span>)</span></h3>
+            <span class="sub">Angka sama dengan kolom kasbon di Payroll</span>
+            <div class="sp"><div class="search" style="min-width:240px"><svg class="ic ic-sm"><use href="#i-search"/></svg><input id="ksQ" placeholder="Cari nama atau ID..."></div></div>
+          </div>
+          <div class="table-wrap fz" style="max-height:60vh"><table class="pay-table">
+            <thead><tr><th class="l" style="width:56px">No.</th><th class="l sticky-col">Karyawan</th><th class="l">Job Site</th>
+              <th class="num g-kas bl">Sisa Kasbon<br>Bulan Lalu</th><th class="num g-out">Potongan<br>Bulan Ini</th><th class="num g-kas">Sisa Setelah<br>Potongan</th>
+              <th class="num g-in bl">Kasbon Cair<br>Bulan Ini *</th><th class="num g-tot bl">Saldo Akhir</th></tr></thead>
+            <tbody id="ksBody"></tbody><tfoot id="ksFoot"></tfoot>
+          </table></div>
+          <div class="card-body small" style="padding-top:10px">* Kasbon cair bulan ini dipotong mulai payroll bulan depan. Saldo Akhir = Sisa Setelah Potongan + Kasbon Cair Bulan Ini = Sisa Kasbon Bulan Lalu pada payroll bulan depan.</div>
+        </div>
+        <div class="card">
+          <div class="card-head bordered">
+            <h3><span class="hi hi-green"><svg class="ic ic-sm"><use href="#i-check"/></svg></span>Realisasi Pengajuan Kasbon Bulan <span id="kasPeriodLbl"></span></h3>
+            <div class="sp"><button class="btn btn-primary" onclick="openKasbon()"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Pengajuan Kasbon</button></div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Tgl. Cair</th><th>Keterangan</th><th class="num">Nominal</th><th></th></tr></thead>
+            <tbody id="kasCairBody"></tbody><tfoot id="kasCairFoot"></tfoot>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-head bordered"><h3><span class="hi hi-orange"><svg class="ic ic-sm"><use href="#i-coins"/></svg></span>Pengajuan Kasbon yang Belum Realisasi</h3><span class="sub">Semua pengajuan yang belum dicairkan</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Tgl. Pengajuan</th><th>Keterangan</th><th class="num">Nominal</th><th></th></tr></thead>
+            <tbody id="kasPendBody"></tbody><tfoot id="kasPendFoot"></tfoot>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- BATCH -->
+      <section id="tab-batch" class="page" hidden>
+        <div class="card">
+          <div class="card-head bordered">
+            <h3>Rekapitulasi Batch Transfer Bank</h3><span class="sub" id="batchInfo"></span>
+            <div class="sp"><button class="btn btn-success" onclick="exportBatchXlsx()"><svg class="ic ic-sm"><use href="#i-sheet"/></svg>Download Excel Batch Transfer</button></div>
+          </div>
+          <div class="card-body" id="batchList"></div>
+        </div>
+      </section>
+
+      <!-- GAJI BPJS & GAJI PAJAK: halaman dibuat oleh script buildSubPages() -->
+      <div id="subRptHost"></div>
+
+      <!-- MUTASI -->
+      <section id="tab-mutasi" class="page" hidden>
+        <div class="card">
+          <div class="card-head bordered"><h3><span class="hi hi-blue"><svg class="ic ic-sm"><use href="#i-uplus"/></svg></span>Karyawan Baru yang Bergabung di Bulan <span class="mutPeriod"></span></h3>
+            <span class="sub">Otomatis dari Tanggal Mulai Bekerja</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Jabatan</th><th>Tgl. Mulai Bekerja</th><th>Site</th><th class="num">Gapok</th><th class="num">Tn. Lapangan</th><th class="num">Gaji Bersih</th></tr></thead>
+            <tbody id="newBody"></tbody><tfoot id="newFoot"></tfoot>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-head bordered"><h3><span class="hi hi-green"><svg class="ic ic-sm"><use href="#i-trend"/></svg></span>Karyawan Naik Gaji di Bulan <span class="mutPeriod"></span></h3>
+            <div class="sp"><button class="btn btn-primary" onclick="openRaise()"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Catat Kenaikan Gaji</button></div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Jabatan</th><th>Tgl. Mulai Bekerja</th><th>Site</th><th class="num">Gaji Awal</th><th class="num">Kenaikan</th><th class="num">Gaji Baru</th><th></th></tr></thead>
+            <tbody id="raiseBody"></tbody><tfoot id="raiseFoot"></tfoot>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-head bordered"><h3><span class="hi hi-red"><svg class="ic ic-sm"><use href="#i-ux"/></svg></span>Karyawan yang PHK di Bulan <span class="mutPeriod"></span></h3>
+            <div class="sp"><button class="btn btn-danger" onclick="openPhk()"><svg class="ic ic-sm"><use href="#i-plus"/></svg>Catat PHK</button></div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th style="width:56px">No.</th><th>Nama</th><th>Jabatan</th><th>Tgl. Mulai Bekerja</th><th>Tgl. PHK</th><th>Masa Kerja</th><th>Site</th><th>Hak Kompensasi</th><th>Alasan PHK</th><th class="num">Kompensasi</th><th></th></tr></thead>
+            <tbody id="phkBody"></tbody><tfoot id="phkFoot"></tfoot>
+          </table></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ====================== MODALS ====================== -->
+<div class="modal" id="mEmp"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="mEmpTitle">Karyawan</h3><div class="sub">Lengkapi data karyawan. Kolom bertanda * wajib diisi.</div></div><button class="x" onclick="closeModal('mEmp')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="empForm"><div class="modal-body">
+    <div class="sec-title">Identitas</div>
+    <div class="grid g2">
+      <div class="field"><label>ID Karyawan</label><input id="eId" readonly placeholder="Otomatis (EMP-xxx)"></div>
+      <div class="field"><label>Status</label><select id="eStatus"></select></div>
+      <div class="field full"><label>Nama Lengkap *</label><input id="eName" required></div>
+      <div class="field"><label>Email</label><input id="eEmail" type="email"></div>
+      <div class="field"><label>No WA / Telepon</label><input id="ePhone" inputmode="tel"></div>
+    </div>
+    <div class="sec-title" style="margin-top:18px">Pekerjaan</div>
+    <div class="grid g2">
+      <div class="field"><label>Departemen</label><input id="eDept" list="dlDept"></div>
+      <div class="field"><label>Jabatan</label><input id="ePos"></div>
+      <div class="field"><label>Tanggal Mulai Bekerja</label><input id="eStart" type="date"></div>
+      <div class="field"><label>Masa Kerja (otomatis)</label><input id="eTenure" readonly placeholder="-"></div>
+      <div class="field"><label>Job Site</label><input id="eSite" list="dlSite"></div>
+      <div class="field"><label>Status PTKP (info PPh 21)</label><select id="ePtkp"></select></div>
+    </div>
+    <div class="sec-title" style="margin-top:18px">Rekening Gaji</div>
+    <div class="grid g2">
+      <div class="field"><label>Bank</label><input id="eBank" list="dlBank" placeholder="BCA, MANDIRI, BRI..."></div>
+      <div class="field"><label>No Rekening</label><input id="eAcc" class="mono" inputmode="numeric"></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mEmp')">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>
+</div></div>
+<datalist id="dlDept"></datalist><datalist id="dlSite"></datalist><datalist id="dlBank"></datalist>
+
+<div class="modal" id="mImport"><div class="modal-box">
+  <div class="modal-head"><h3>Import Data Karyawan</h3><button class="x" onclick="closeModal('mImport')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="modal-body">
+    <div class="stepbox"><h5><span class="n">1</span>URL Google Sheets</h5>
+      <input id="impUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+      <div class="hint">Baris pertama = header sesuai Template CSV Master Karyawan. File harus dapat diakses akun pemilik script.</div>
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="importEmpSheet()">Import dari URL</button></div>
+    <div class="stepbox"><h5><span class="n">2</span>File CSV</h5>
+      <input type="file" id="impFile" accept=".csv,.txt">
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="importEmpCsv()">Import dari CSV</button></div>
+    <div class="hint">Karyawan dengan ID yang sama (atau Nama + No Rekening yang sama) akan diperbarui, selebihnya ditambahkan sebagai karyawan baru dengan ID otomatis. Status lama "Tetap/Kontrak" otomatis dibaca sebagai PKWTT/PKWT.</div>
+    <div id="impResult"></div>
+  </div>
+</div></div>
+
+<div class="modal" id="mPay"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="mPayTitle">Input Payroll</h3><div class="sub">Periode <span id="payFormPeriod"></span></div></div><button class="x" onclick="closeModal('mPay')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="payForm"><div class="modal-body">
+    <div class="grid g2">
+      <div class="field full"><label>Karyawan (status aktif) *</label><select id="pEmp" required></select><div class="hint" id="pDupHint" hidden></div></div>
+      <div class="field"><label>Gaji Pokok</label><input id="pGp" type="number" min="0" value="0"></div>
+      <div class="field"><label>Tunjangan Lapangan</label><input id="pTl" type="number" min="0" value="0"></div>
+      <div class="field"><label>THR</label><input id="pThr" type="number" min="0" value="0"></div>
+      <div class="field"><label>Sisa Kasbon Bulan Lalu</label><input id="pKasLalu" type="number" min="0" value="0"><div class="hint">Otomatis dari payroll sebelumnya + kasbon cair bulan lalu. Bisa dikoreksi.</div></div>
+      <div class="field"><label>Potongan Kasbon</label><input id="pPot" type="number" min="0" value="0"></div>
+      <div class="field full sec-title" style="margin:6px 0 0">Potongan BPJS Pekerja (input manual)</div>
+      <div class="field"><label>BPJS JHT Pekerja</label><input id="pJht" type="number" min="0" value="0"></div>
+      <div class="field"><label>BPJS JP Pekerja</label><input id="pJp" type="number" min="0" value="0"></div>
+      <div class="field"><label>BPJS Kesehatan Pekerja</label><input id="pKes" type="number" min="0" value="0"></div>
+    </div>
+    <input type="hidden" id="pId">
+    <div class="preview" id="payPreview"></div>
+    <label class="check-line" id="pConfirmWrap" style="margin-top:14px" hidden><input type="checkbox" id="pConfirm">Data sudah benar, tandai <b>dikonfirmasi (FINAL)</b></label>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mPay')">Batal</button><button class="btn btn-success" type="submit" id="pSubmit">Simpan Payroll</button></div></form>
+</div></div>
+
+<div class="modal" id="mBulk"><div class="modal-box wide">
+  <div class="modal-head"><div><h3>Bulk Payroll Engine</h3><div class="sub">Periode <span id="bulkPeriod"></span></div></div><button class="x" onclick="closeModal('mBulk')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="modal-body">
+    <div class="stepbox"><h5><span class="n">1</span>Download Template Payroll (terisi otomatis seluruh karyawan aktif)</h5>
+      <div class="grid g2"><div><label>Pemisah kolom CSV</label><select id="csvDelim"><option value=";">Titik koma ( ; ) - Excel Indonesia</option><option value=",">Koma ( , ) - Google Sheets</option></select></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn btn-ghost" onclick="downloadPayTemplate()"><svg class="ic ic-sm"><use href="#i-download"/></svg>Download Template Payroll</button></div></div>
+      <div class="hint">Isi kolom Gaji Pokok, Tunjangan Lapangan, THR, Potongan Kasbon, dan potongan <b>BPJS JHT / JP / Kesehatan</b> (input manual, sudah terisi dari payroll terakhir). Baris tanpa Gaji Pokok, Tunjangan, dan THR dilewati. Jangan ubah kolom ID Karyawan.</div></div>
+    <div class="stepbox"><h5><span class="n">2</span>Upload Bulk Payroll</h5>
+      <div class="grid g2">
+        <div><label>File CSV</label><input type="file" id="bulkFile" accept=".csv,.txt"></div>
+        <div><label>atau URL Google Sheets</label><input id="bulkUrl" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
+      </div>
+      <div class="hint" id="bulkInfo"></div>
+      <button class="btn btn-success" style="margin-top:12px" onclick="runBulk()">Hitung Semua Karyawan Sekarang</button>
+      <div class="hint">Upload ulang pada periode yang sama akan <b>menggantikan</b> data payroll lama (manual maupun bulk) milik ID yang sama, sehingga tidak ada entri ganda.</div>
+    </div>
+    <div id="bulkResult"></div>
+  </div>
+</div></div>
+
+<div class="modal" id="mKas"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="mKasTitle">Pengajuan Kasbon</h3><div class="sub">Kasbon cair dipotong mulai payroll bulan berikutnya.</div></div><button class="x" onclick="closeModal('mKas')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="kasForm"><div class="modal-body"><div class="grid g2">
+    <input type="hidden" id="kId">
+    <div class="field full"><label>Karyawan *</label><select id="kEmp" required></select></div>
+    <div class="field"><label>Tgl. Pengajuan *</label><input id="kReq" type="date" required></div>
+    <div class="field"><label>Nominal *</label><input id="kAmt" type="number" min="1" required></div>
+    <div class="field full"><label>Keterangan</label><input id="kNote" placeholder="Opsional"></div>
+    <div class="field"><label>Status</label><select id="kStatus"><option value="Pengajuan">Belum realisasi (pengajuan)</option><option value="Cair">Sudah cair (realisasi)</option></select></div>
+    <div class="field" id="kCairWrap"><label>Tgl. Cair *</label><input id="kCair" type="date"></div>
+  </div></div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mKas')">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>
+</div></div>
+
+<div class="modal" id="mCair"><div class="modal-box xs">
+  <div class="modal-head"><div><h3>Cairkan Kasbon</h3><div class="sub" id="cairInfo"></div></div><button class="x" onclick="closeModal('mCair')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="cairForm"><div class="modal-body">
+    <input type="hidden" id="cId">
+    <div class="field"><label>Tanggal Cair *</label><input id="cDate" type="date" required></div>
+    <div class="hint">Kasbon akan mulai dipotong pada payroll bulan setelah tanggal cair.</div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mCair')">Batal</button><button class="btn btn-success" type="submit">Tandai Cair</button></div></form>
+</div></div>
+
+<div class="modal" id="mRaise"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="mRaiseTitle">Catat Kenaikan Gaji</h3><div class="sub">Periode <span class="mutPeriod"></span></div></div><button class="x" onclick="closeModal('mRaise')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="raiseForm"><div class="modal-body"><div class="grid g2">
+    <input type="hidden" id="rId">
+    <div class="field full"><label>Karyawan *</label><select id="rEmp" required></select></div>
+    <div class="field"><label>Gaji Awal *</label><input id="rOld" type="number" min="0" required><div class="hint" id="rOldHint">Terisi otomatis dari Gaji Pokok payroll terakhir.</div></div>
+    <div class="field"><label>Kenaikan *</label><input id="rRaise" type="number" min="1" required></div>
+    <div class="field"><label>Gaji Baru (otomatis)</label><input id="rNew" readonly class="money"></div>
+    <div class="field"><label>Keterangan</label><input id="rNote" placeholder="Opsional"></div>
+  </div></div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mRaise')">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>
+</div></div>
+
+<div class="modal" id="mPhk"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="mPhkTitle">Catat PHK Karyawan</h3><div class="sub">Status karyawan otomatis diubah menjadi PHK setelah disimpan.</div></div><button class="x" onclick="closeModal('mPhk')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="phkForm"><div class="modal-body"><div class="grid g2">
+    <input type="hidden" id="hId">
+    <div class="field full"><label>Karyawan *</label><select id="hEmp" required></select></div>
+    <div class="field"><label>Tanggal PHK *</label><input id="hDate" type="date" required></div>
+    <div class="field"><label>Masa Kerja s/d Tgl. PHK</label><input id="hTenure" readonly placeholder="-"></div>
+    <div class="field full"><label>Alasan PHK *</label><select id="hReason" required></select></div>
+    <div class="field full" id="hOtherWrap" hidden><label>Alasan lainnya *</label><input id="hOther" placeholder="Tuliskan alasan PHK"></div>
+    <div class="field full"><label>Hak Kompensasi</label><div class="chips" id="hRights"></div></div>
+    <div class="field"><label>Nominal Kompensasi (Rp)</label><input id="hAmt" type="number" min="0" value="0"></div>
+    <div class="field"><label>Keterangan</label><input id="hNote" placeholder="Opsional"></div>
+  </div></div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mPhk')">Batal</button><button class="btn btn-danger" type="submit">Simpan PHK</button></div></form>
+</div></div>
+
+<div class="modal" id="mBpjs"><div class="modal-box wide">
+  <div class="modal-head"><div><h3>Aturan Gaji BPJS</h3><div class="sub">Khusus laporan Gaji BPJS. Tidak mengubah potongan BPJS di Payroll / Gaji Real.</div></div><button class="x" onclick="closeModal('mBpjs')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="bpjsForm"><div class="modal-body">
+    <div class="sec-title">Gaji BPJS otomatis</div>
+    <div class="grid g2">
+      <div class="field"><label>Batas minimal Gaji BPJS / UMK-UMP (Rp)</label><input id="rbUmk" type="number" min="0"><div class="hint">Gaji BPJS otomatis = MAX(Gaji Pokok, nilai ini). 0 = tidak dipakai. Nominal per karyawan tetap bisa diedit manual.</div></div>
+    </div>
+    <div class="sec-title" style="margin-top:18px">Persentase iuran &amp; plafon</div>
+    <div class="table-wrap boxed"><table class="rule-table">
+      <thead><tr><th>Program</th><th class="num">Pekerja (%)</th><th class="num">Pemberi Kerja (%)</th><th class="num">Plafon upah (Rp)</th></tr></thead>
+      <tbody>
+        <tr><td><b>BPJS Kesehatan</b></td><td><input id="rbKesEe" type="number" step="0.0001" min="0"></td><td><input id="rbKesEr" type="number" step="0.0001" min="0"></td><td><input id="rbKesCap" type="number" min="0"></td></tr>
+        <tr><td><b>JHT</b> (Hari Tua)</td><td><input id="rbJhtEe" type="number" step="0.0001" min="0"></td><td><input id="rbJhtEr" type="number" step="0.0001" min="0"></td><td class="small">tanpa plafon</td></tr>
+        <tr><td><b>JP</b> (Pensiun)</td><td><input id="rbJpEe" type="number" step="0.0001" min="0"></td><td><input id="rbJpEr" type="number" step="0.0001" min="0"></td><td><input id="rbJpCap" type="number" min="0"></td></tr>
+        <tr><td><b>JKK</b> (Kecelakaan Kerja)<div style="margin-top:6px"><select id="rbJkkLvl"></select></div></td><td class="small">-</td><td><input id="rbJkk" type="number" step="0.0001" min="0"></td><td class="small">tanpa plafon</td></tr>
+        <tr><td><b>JKM</b> (Kematian)</td><td class="small">-</td><td><input id="rbJkm" type="number" step="0.0001" min="0"></td><td class="small">tanpa plafon</td></tr>
+      </tbody></table></div>
+    <div class="hint" style="margin-top:10px">Plafon 0 = tanpa plafon. Plafon JP disesuaikan setiap tahun oleh BPJS Ketenagakerjaan, cek surat edaran terbaru.</div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="openRefs()">Referensi Regulasi</button><span style="flex:1"></span><button type="button" class="btn btn-ghost" onclick="closeModal('mBpjs')">Batal</button><button class="btn btn-primary" type="submit">Simpan Aturan</button></div></form>
+</div></div>
+
+<div class="modal" id="mTaxRule"><div class="modal-box">
+  <div class="modal-head"><div><h3>Aturan Gaji Pajak</h3><div class="sub">Khusus laporan Gaji Pajak. Tidak mengubah Gaji Real.</div></div><button class="x" onclick="closeModal('mTaxRule')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="taxRuleForm"><div class="modal-body">
+    <label>Komponen penghasilan yang dihitung ke Gaji Pajak (otomatis)</label>
+    <div class="radio-list" id="tcList">
+      <label><input type="checkbox" value="gp"><span>Gaji Pokok<small>Dari Payroll.</small></span></label>
+      <label><input type="checkbox" value="tl"><span>Tunjangan Lapangan<small>Dari Payroll.</small></span></label>
+      <label><input type="checkbox" value="thr"><span>THR<small>Dari Payroll.</small></span></label>
+      <label><input type="checkbox" value="jkk"><span>Premi JKK dibayar pemberi kerja<small>Dari aturan Gaji BPJS.</small></span></label>
+      <label><input type="checkbox" value="jkm"><span>Premi JKM dibayar pemberi kerja<small>Dari aturan Gaji BPJS.</small></span></label>
+      <label><input type="checkbox" value="kes"><span>BPJS Kesehatan dibayar pemberi kerja<small>Dari aturan Gaji BPJS.</small></span></label>
+    </div>
+    <div class="callout" style="margin-top:14px"><svg class="ic"><use href="#i-info"/></svg><div>Sesuai PP 58/2023, penghasilan bruto PPh 21 mencakup gaji, tunjangan, THR, serta premi JKK, JKM, dan BPJS Kesehatan yang dibayar pemberi kerja (semua tercentang).
+      PPh 21 = <b>tarif TER</b> resmi sesuai <b>Status PTKP</b> x Gaji Pajak. Nominal Gaji Pajak per karyawan tetap bisa diedit manual.</div></div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="openRefs()">Referensi Regulasi</button><span style="flex:1"></span><button type="button" class="btn btn-ghost" onclick="closeModal('mTaxRule')">Batal</button><button class="btn btn-primary" type="submit">Simpan Aturan</button></div></form>
+</div></div>
+
+<div class="modal" id="mPtkp"><div class="modal-box xs">
+  <div class="modal-head"><div><h3>Set Status PTKP</h3><div class="sub" id="ptTarget"></div></div><button class="x" onclick="closeModal('mPtkp')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="ptkpForm"><div class="modal-body">
+    <div class="field"><label>Status PTKP *</label><select id="ptVal" required></select></div>
+    <div class="hint">Disimpan ke Master Karyawan dan dipakai untuk kategori TER PPh 21.</div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mPtkp')">Batal</button><button class="btn btn-primary" type="submit">Terapkan</button></div></form>
+</div></div>
+
+<div class="modal" id="mRefs"><div class="modal-box wide">
+  <div class="modal-head"><div><h3>Referensi Regulasi BPJS &amp; Pajak</h3><div class="sub">Diperbarui sesuai ketentuan yang berlaku</div></div><button class="x" onclick="closeModal('mRefs')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="modal-body ref" id="refsBody"></div>
+</div></div>
+
+<div class="modal" id="mRules"><div class="modal-box wide">
+  <div class="modal-head"><h3>Aturan Bisnis Kalkulasi</h3><button class="x" onclick="closeModal('mRules')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="modal-body" id="rulesBody"></div>
+</div></div>
+
+<div class="modal" id="mSet"><div class="modal-box wide">
+  <div class="modal-head"><div><h3>Pengaturan</h3><div class="sub">Potongan BPJS Payroll diinput manual. Aturan Gaji BPJS &amp; Gaji Pajak diatur di menu masing-masing.</div></div><button class="x" onclick="closeModal('mSet')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="setForm"><div class="modal-body">
+    <div class="sec-title">Perusahaan</div>
+    <div class="grid g2">
+      <div class="field full"><label>Nama Perusahaan (kop PDF)</label><input id="sCo"></div>
+      <div class="field full"><label>Alamat Perusahaan (opsional)</label><input id="sAddr"></div>
+      <div class="field"><label>Limit Maksimal per Batch Transfer (Rp)</label><input id="sBatch" type="number" min="1"></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mSet')">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>
+</div></div>
+
+<div class="modal" id="mCopy"><div class="modal-box">
+  <div class="modal-head"><div><h3>Salin Payroll dari Bulan Lalu</h3><div class="sub">Hasil salinan berstatus <b>DRAFT</b> untuk dikoreksi &amp; dikonfirmasi.</div></div><button class="x" onclick="closeModal('mCopy')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="copyForm"><div class="modal-body">
+    <div class="grid g2">
+      <div class="field"><label>Salin dari periode</label><input type="month" id="cpFrom" required></div>
+      <div class="field"><label>Ke periode</label><input id="cpTo" readonly></div>
+    </div>
+    <div class="callout" style="margin-top:14px"><svg class="ic"><use href="#i-info"/></svg><div>
+      <b>Yang disalin:</b> Gaji Pokok, Tunjangan Lapangan, dan nilai manual laporan. Bank, rekening, dan job site diambil dari Master Karyawan terbaru.<br>
+      <b>Otomatis:</b> Sisa kasbon dihitung ulang (termasuk kasbon cair), potongan kasbon disalin maksimal sebesar sisa. Bila ada catatan <b>Naik Gaji</b> di periode tujuan, Gaji Pokok memakai Gaji Baru.<br>
+      <b>Dilewati:</b> karyawan yang sudah punya payroll di periode tujuan, serta yang statusnya tidak aktif.</div></div>
+    <label class="check-line" style="margin-top:14px"><input type="checkbox" id="cpThr">Ikut salin THR (biasanya tidak, THR dibayar sekali)</label>
+    <div id="cpResult"></div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mCopy')">Tutup</button><button class="btn btn-primary" type="submit" id="cpBtn">Salin sebagai Draft</button></div></form>
+</div></div>
+
+<div class="modal" id="mRep"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="rpTitle">Edit Gaji</h3><div class="sub" id="rpWho"></div></div><button class="x" onclick="closeModal('mRep')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="repForm"><div class="modal-body">
+    <input type="hidden" id="rpId"><input type="hidden" id="rpMode">
+    <div class="field" id="rpKesWrap"><label>Gaji BPJS (Rp)</label><input id="rpKes" type="number" min="0" placeholder="Kosong = otomatis">
+      <div class="auto-hint"><span>Otomatis: <b id="rpKesAuto"></b></span><button type="button" class="link-btn" onclick="$('#rpKes').value=''">Pakai otomatis</button></div></div>
+    <div class="field" id="rpTaxWrap" style="margin-bottom:16px"><label>Gaji Pajak (Rp)</label><input id="rpTax" type="number" min="0" placeholder="Kosong = otomatis">
+      <div class="auto-hint"><span>Otomatis: <b id="rpTaxAuto"></b></span><button type="button" class="link-btn" onclick="$('#rpTax').value=''">Pakai otomatis</button></div></div>
+    <div class="field" id="rpPtkpWrap"><label>Status PTKP</label><select id="rpPtkp"></select></div>
+    <div class="hint" style="margin-top:12px">Hanya untuk laporan ini. Tidak mengubah Gaji Real / Payroll.</div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mRep')">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>
+</div></div>
+
+<div class="modal" id="mRepAll"><div class="modal-box">
+  <div class="modal-head"><div><h3 id="raTitle">Edit Semua</h3><div class="sub" id="raTarget"></div></div><button class="x" onclick="closeModal('mRepAll')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="repAllForm"><div class="modal-body">
+    <div class="field" style="margin-bottom:16px"><label>Jenis gaji yang diubah</label>
+      <select id="raField"><option value="kesBase">Gaji BPJS</option><option value="taxBaseOv">Gaji Pajak</option></select></div>
+    <label>Setarakan dengan</label>
+    <div class="radio-list" id="raMode">
+      <label><input type="radio" name="raMode" value="value" checked><span>Nominal tertentu<small>Semua karyawan terpilih memakai nominal yang sama.</small></span></label>
+      <label><input type="radio" name="raMode" value="thp"><span>Gaji Real (Take Home Pay)<small>Sama dengan gaji bersih masing-masing karyawan.</small></span></label>
+      <label><input type="radio" name="raMode" value="gp"><span>Gaji Pokok<small>Sama dengan gaji pokok masing-masing karyawan.</small></span></label>
+      <label><input type="radio" name="raMode" value="bruto"><span>Penghasilan Bruto<small>Gaji Pokok + Tunjangan Lapangan + THR.</small></span></label>
+      <label><input type="radio" name="raMode" value="auto"><span>Kembalikan ke otomatis<small>Hapus nilai manual, pakai hitungan sistem.</small></span></label>
+    </div>
+    <div class="field" id="raValWrap" style="margin-top:14px"><label>Nominal (Rp) *</label><input id="raVal" type="number" min="0"></div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mRepAll')">Batal</button><button class="btn btn-primary" type="submit">Terapkan</button></div></form>
+</div></div>
+
+<div class="modal" id="mMove"><div class="modal-box">
+  <div class="modal-head"><div><h3>Pindah Periode Payroll</h3><div class="sub">Untuk data yang terlanjur tersimpan di periode yang salah.</div></div><button class="x" onclick="closeModal('mMove')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="moveForm"><div class="modal-body">
+    <div class="grid g2">
+      <div class="field"><label>Dari periode</label><input id="mvFrom" readonly></div>
+      <div class="field"><label>Pindahkan ke periode *</label><input type="month" id="mvTo" required></div>
+    </div>
+    <div class="callout warn" style="margin-top:14px"><svg class="ic"><use href="#i-info"/></svg><div>
+      Semua baris payroll (<b id="mvCount">0</b> baris) akan dipindahkan <b>tanpa mengubah angka</b>. Periode asal menjadi kosong.
+      Ditolak bila periode tujuan sudah berisi payroll, agar data tidak tercampur.<br>Setelah dipindah, buka periode asal lalu klik <b>Salin dari Bulan Lalu</b> untuk membuat draft.</div></div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mMove')">Batal</button><button class="btn btn-primary" type="submit">Pindahkan</button></div></form>
+</div></div>
+
+<div class="modal" id="mRptImp"><div class="modal-box wide">
+  <div class="modal-head"><div><h3 id="riTitle">Import</h3><div class="sub">Periode <span id="riPeriod"></span>. Gaji Real tidak diubah.</div></div><button class="x" onclick="closeModal('mRptImp')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="modal-body">
+    <div class="stepbox"><h5><span class="n">1</span>Download template (berisi karyawan yang punya payroll periode ini)</h5>
+      <button class="btn btn-ghost" onclick="downloadRptTemplate()"><svg class="ic ic-sm"><use href="#i-download"/></svg>Download Template</button>
+      <div class="hint" id="riHint"></div></div>
+    <div class="stepbox"><h5><span class="n">2</span>Upload file</h5>
+      <div class="grid g2">
+        <div><label>File CSV</label><input type="file" id="riFile" accept=".csv,.txt"></div>
+        <div><label>atau URL Google Sheets</label><input id="riUrl" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runRptImport()"><svg class="ic ic-sm"><use href="#i-upload"/></svg>Import Sekarang</button></div>
+    <div id="riResult"></div>
+  </div>
+</div></div>
+
+<div class="modal" id="mRecalc"><div class="modal-box wide">
+  <div class="modal-head"><div><h3>Hitung Ulang Payroll</h3><div class="sub">Pratinjau: data belum diubah sampai Anda klik Terapkan.</div></div><button class="x" onclick="closeModal('mRecalc')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="modal-body" id="rcBody"></div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mRecalc')">Batal</button><button class="btn btn-amber" id="rcApply" onclick="applyRecalc()">Terapkan</button></div>
+</div></div>
+
+<div class="modal" id="mPass"><div class="modal-box xs">
+  <div class="modal-head"><h3>Ganti Password</h3><button class="x" onclick="closeModal('mPass')"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <form id="passForm"><div class="modal-body">
+    <div style="margin-bottom:14px"><label>Password Lama</label><input id="pwOld" type="password" required></div>
+    <div style="margin-bottom:14px"><label>Password Baru (min. 6 karakter)</label><input id="pwNew" type="password" required minlength="6"></div>
+    <div><label>Ulangi Password Baru</label><input id="pwNew2" type="password" required></div>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mPass')">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>
+</div></div>
+
+<div id="toast"></div>
+<div id="loading"><div class="spin"></div></div>
+
+<script>
+/* Logo PT. Prohaba Jaya Mandiri (PNG base64, dipakai di aplikasi & kop PDF) */
+const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAAwFBMVEX///////7+///+//7+//39//7//v7+/v/+/v7//v39/v79/v39/Pn5/Pry7t3T59al18T2vXacxLKDwV99w0d9w0F9wkF9wkB9vlp0xY93vFA0rmsYq0wYqU4YqUwYqUoYqEwFp+ASqHMBp+ICp98Bp98Bp935oh74oB35oBv4oBv4oBr3oBv3lxf1eyD0eyH0eyD0ex71eR3yfCGvhlEuoF8ehGMDn7UCgkMDbJAAjXsAfDoAZbEAZbAAZa8AXbGK12uFAAAOP0lEQVR42u1bj1PiSBMdkj0YEiYTZoVcKofArooK6goXlir88f//V1/3TAIJZIbABuHqo+vOszxdH4/u16+7s4Rc4hKXuMQlLnGJS1ziEpe4xP9T1M1xIagimmuttjG8MwTdJHz2MtPH66hVO7cMsWvse/Dy+jrVBPyfNjk70MQPurNnA9XTmQdvx3lh9q6CTjCb/tLGy7TtnhfV1BJBp3v173Smw/w6m07Pi2qb8Kug20WqZyaqW/Xa2WCu2VCFnW4QmKiWqM+IaiA6AKLxHxPVshbr51OFSDRGJ5g+60HPpu3a+YCGKkSqu0GnMzPW4tnInpS7bhIlavE8QLe+rzAD6n9NWv16JlR/U1WYofp59qJD/YxUn55raTo6a9DYYV5MaX0OFkSajmxcGbL69TxkL1eFaVbPDB3mHKi2bRF0N1Dv8E0nr0XVC/Og0e29Gqk+rQVJTMcG0R2QPT1sGGJOSzUSvYlZUa3vMDgOnHLykqajWxDGDiPd3ulAU5C7TiFoYzN/PmVfVDNWIeqrfw2qh7Vo1U9Vhc3i5EhkT1+LJ5Q9rEIdZKzF519mt1c/ldx1NbCDrnnymp1o8rJ1VZjA/j6bvhj74glkLzNjFVPNvddfeot6mlqUM5YWcyf47rTaO6j+8gRJNh1aoq88QjyTcQKqm/VTVKGBaJ/Ydbs91ZvU59cvXzh908udqkIGoJFqrVjDDDP6WtnbmrFyJQj/csgf4NGQ1fAevH6t7Em503YWJLpmy+PAaPqij6+1IAUzVq4ddjl4KYJUe1NjfGUt2k1hzGjRtJN63XGHabdI7evkLtghd3bJP+rLiLaNcgcZ7Wcwm0+Lta+twq6pCm2bnFko02GgmoOKnx9oEVzpczr43rJrZ0i0AbKmCmvGOL7pMPRCaToE2Tuha18hd0bTUUR0yxzHRm0Tg9wFqenYJNLbdeqvHb0K9TR30HRsAYBmPnkyxei4FsRoOnDK5UUZXSftp9G9NkZPYEGOyLXtCu0ALk2HW1SF+CjI0/3j+LE4JuPJMakG6989xHRgghhA3z+1W0cTvsLFbjajdXJXU1RrA1AfjWqz3HWK5W5F9XiiBz0eHesQoxa72nnlKuD6vlKvtZ8etAkyRqqPBNoC02Ei2mA6gOrR+GEyNlHdPE5yGDcdHW5q4Ch7hqwG2aP1I8mdaXcnqG30LFiLY31WH0X2dhGdrULbcR0K4Th2vhbvTQJSvezJTYfJKfmp9bcdJ3vhcJM3oIzs1Ssn2jfvG+WmA0HCB8Z9geFzhl9zXJrWohb1/UP1tWjedHSDRO5sFxGH0XypYh6FvocvA9v7jloEqite/kp3Z1opSdMBeeGJaAFoF0kkwBlewsCijgyoK5c9WYUGzMp0UMJEvMabgMePMcB2cbc3fjRSXeX92TabjitpOgA1DxfLhN/IDxdxGOHn8gWEnNCmuRah91RJdfE1OZMcQDQlrgj9WGKO4DNCoA6F74tY8R77xIZavDdw/fA0qk72zDNWIGcs+B4hGPPnkBUhpHCduaQhIg70zxX7CwFcm6ieVOr21KbDuNjFdPaJz+shFB4nzHWp22IgJCHnqyQXSvYMbq+6yYuaNx1ItCsxc8EIX0ScuYwx2WGYiHwvXK5RuyB7Wtuk3F4loGvE2AuvcMZyIIEJC7kFgreIPNeRHYaHcQjqzFLUy6VPnNboaaLlelKV7EFf+ds0zILcuUCy67BQ+Ch0C0gPX4TxHFUkZB5jiagslnNOLDDWk+NbEFyhd/Ry5wNmT3gN+JiAE1w2GCV2ocfIX2KeoI4YNVuQh3E1M4z2UZTkjlWjVAC5FFErfVMQ40iKhi+lL1yltQWyd2+SvWruz03TWYjL5GBoRt0GEYm8SWWWJTgX8AmP1cuZL+ZezQWq9VldVS3qnzfoyA26C0S76J9de6UUKjPi5TLm0GicUNmRKFyGQPXI0GEqsyBNwpMDYcGmQxKtMBMWrUHH82XoQz+HTsMsD8tyEcUhUE3+Ms0wj3Lh9IeuQ/2nXjTTAvvQ5SjxQe4QNEu7n5S3MF7GoHax5zDqEA4CuAzxNQkpeyM91+P7P6PaMttpNB1N6CCeyg5sLWmA4sWQCl4ITLtUjgbQLLHJRww8qiE/xqM/c3sWEKQmv63HYNUjPzBjUdRodwP0MiI8Ws5Dj0BrxHHRcZmr8h21umkecicwDjT/wJFGoRrxCo7hgapCh/hglDaZnvvgQqR1sqmccakLea1yRwq7IanH0oIcmtaAp3/NibNaieUcSBBcybfBgVmQtpoAy3XXNmMRzaXsJboCgzlDuy1FhbjNWtuU1SB7h2o1JHLU70fJVRAfos+LtVzsoiUNBZGgib/ICF4ieyo9qGPZyRsBoG3zkPs4nhwsew4J+73rvp9SvVGLasYCCyg4p0CnQ7OCl6bJMinEFqaQTBD8CoXJ6+nBlCBt96BaBJnq9Xu9fuRZ9spV5zcdci70BKszB4leC94KcxxHzALQBHwTvBNz5T+gRHDy0veYQ92eZbtA9OC61w9XVK8tSKAenpFfBdAuLQQNrQWwyvRg4E0cmfISNI4DOKtUPORiFfYk6F62Ftegk00HgiYKNIs3QMegeY6SQ0wRytP0sEmtbpS9yeMhCyeUO8jo6+sBUO3a1uoQEKxNRy0HGlCHOdCoyH8xt9mkKlyV9Ap0MnlNKpU9SoTEfA1Up7X4jfCrxIGg3NEkaZKGCIWYBx3zhOU0EkkU6ifr1i4Lsi9oqMK4P7hOUK9k71tSi51AJK7EAsnjaXrk1AOkjTk0BxqyHohO1qt1XDiNq3R71JZVqGKwJXu5O9bKmBJ/ucjYaSCaboD25sulqNPVnn1s3rPvV4tA9CDJDsA8ANlLUUsL0sk8PGPjTJuAThq1HA4jfCkbTLswnYeMWqX27OPH/RZOFqTnCvO1lD1Fj3oSaL3YVa9PUNX1KAOXhN7fF2IOzdptOBtUN8BAMZrZs9+PH0xbkH2GXJS7QZocMqtT2cPzZyfI3rGwj3t1lQhMjls+fjmcY8/ZyA+Z+Jm/qV9vVndepKncZVCD7KlaBKrzd6z6Kqkpc7jcIHjo+CPOpUo3s8gdyjPVYLYg471q0VnJ3Rp0Rva6+WsyXY1b4JodAW7Dh7EqnMdhxBkjVo7uBvPZarTYtWdHC1L2aVTI0g2is7JXI2LzmixFT3k5cHK484iw0SyhI3LPc5yc6IkM5mTPXsXCidJwEzOiFiQ5ADG22Ydwv6RAu4xgNcbC83wIzsBrr6kGqxdy4uSPooaF0+Sh7MIJ3d2gAHSc/3W5C9aKaiCzDszjUoZAajMX5jX8BgzaZDDlELp1XjQIyHhSqhal6finvwl68A+4PZr8ou21qmCNlE+XgfhgGYbzRRTNI8gQV36b24I5l+VBkx17dpS9Et1curv+Fujr65XsFRkVLux1vYFCQy3O1dVlOY9hwPW4EF4Tk4MWnPoNsEudF6ntRdsZna/FwgRJ2qKkGrKe+ZkD1zKO5QgjxBZmaUH0mCelZE/NWMWRyl7RrkEqiDR7+KmD693cNIC7aRjbC1510yR7k0mJhZOasYoxI9XbTK37oo83ZdnMGUs2kRnYEQPMRc8pQC2azovjx52nfurqicZxQAdaoWby2EIJ9PO8tYaBwNdgVqd+w+i1U/agCrOeYwu0XvYQtQ/jAMy4oG6OwzdGrwiPdJqKkBbk4EOMvWU6tvPD1q9JQEPwoNzAwYp40TKzQYXeSLKtcOuxm8n40CecUO76Wswm0VPzO5KNCY2dsc7waJQcPkPuahMLqa4ffuqnxDMTnUy4hsESDR73GJPthKcXfXXQNz0rdPipnxrkLmuqDflFpTfxEDr3Ma3jUOBDH86urb0pqx8m+lo0yZ0i2khXBjZxmcd9EQrBPYTr7HqkesdjN5OJTvbs3IxVVIXeQX9BwXFK/BTUomHw0p8X5Yylx9zT98PCKdMiloNhlbtFyYXTRBuaWoTS31GFzHEa5UMi1v3A+tcm3wczD1qQsS40CydKYcbS692gz6t8nryI//Z49KANtCC17eTw4oEedK//w68ykkRrWEysIoz/1kb8Ny4zN3XAsqAM/9H3lf7vn3fVRVoeMEJ/lo0hs6wiqvU53f8xrC5uh67KDxDZ9/e3VXwYo7BJ0K3FQbavANE3FcXtMP39jiM+P97LxNunII393BJkdHWYh7d+zUq72QfwWwb055tXLLjyAleAejDo/7j7WRnmuyFTv99qsN+fb2+liP7QNQnLLm6JvUG/wuS4uVlXoV8uNyA5frNGw7TgHRQkx/D29q6ifL5NVaAhiX7/M6L1u6Xe72FFRN/dDNdVCHJXKqE/3j5Dl1rGsXa7F/4YViccd4I1Ernz3j7fS4D+ANRGT1wke5XK3U2O6PfScucYR48t2VO9sCrMd349xczLid0byB0jjZ1Lsc0q/Hl3W6HcNZIqDMtV4dv7xy5PrDrMIGujK0yOYcZ0+J9/LndpuCB7mUWvlLvqkuMAuXv/4LuHDzsre71+/8RV+PEpmo2ST0xkiK4O851Ihq8GYW/liP7YIXcFe1NAf/ezwuTYu6/slLvtlU2/yiq8xSps7Cd30L/fdlZhXvb6fSl3lWEepse4hhOWNR2fZVcAqbHuVdtXhmu54yXd3TvKnVVyvUL8HuYzyt1NhURn5O69ZF/hpXctylj3jmY6/FJGCZTjU9TK74eU7FUpdzBjOY3U3ryVI7qs3GX3pzBjDavr3+mMhUaydBWKfTCj2Y2gCm+OYTpA7t5KBVSh1SB7oRZg/e9uKlnN3KyrEHdCnx8lvb+/F9GyFitdg/FEoi2yx5/rWuS08TW/33aqDGt7ubs7yCUucYlLXOISl7jEJS5xiUv8d+N/VZuNA+rzIsUAAAAASUVORK5CYII=';
+
+/* =============================== HELPERS =============================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nf = n => Math.round(Number(n) || 0).toLocaleString('id-ID');
+const rp = n => 'Rp ' + nf(n);
+const ic = (n, cls) => `<svg class="ic ${cls || 'ic-sm'}"><use href="#i-${n}"/></svg>`;
+const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const MON_S = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const periodLabel = p => { const m = /^(\d{4})-(\d{2})$/.exec(p || ''); return m ? MONTHS[+m[2] - 1] + ' ' + m[1] : (p || ''); };
+const fmtDate = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ''); return m ? `${+m[3]} ${MON_S[+m[2] - 1]} ${m[1]}` : (d || '-'); };
+const pct = v => +((Number(v) || 0) * 100).toFixed(4) + '%';
+const BANKS = ['BCA','MANDIRI','BRI','BNI','BSI','CIMB NIAGA','PERMATA','DANAMON','BTN','OCBC NISP','MAYBANK','BANK KALTIM','JAGO'];
+const PTKP_LIST = ['TK/0','TK/1','TK/2','TK/3','K/0','K/1','K/2','K/3'];
+const PHK_REASONS = ['Efisiensi perusahaan','Perusahaan tutup / pailit','Penggabungan, peleburan, atau pengambilalihan perusahaan',
+  'Pelanggaran perjanjian kerja / peraturan perusahaan / PKB','Mangkir 5 hari kerja berturut-turut',
+  'Sakit berkepanjangan / cacat akibat kecelakaan kerja (> 12 bulan)','Memasuki usia pensiun','Meninggal dunia',
+  'Berakhirnya PKWT (habis kontrak)','Lainnya'];
+const PHK_RIGHTS = ['Uang Pesangon (UP)','Uang Penghargaan Masa Kerja (UPMK)','Uang Penggantian Hak (UPH)','Uang Pisah','Kompensasi PKWT','Tidak ada'];
+/* Tingkat risiko JKK: [label, tarif nominal PP 44/2015, tarif efektif setelah rekomposisi JKP 0,14% (PP 6/2025)] */
+const JKK_LEVELS = [['Sangat rendah', .0024, .0010], ['Rendah', .0054, .0040], ['Sedang', .0089, .0075], ['Tinggi', .0127, .0113], ['Sangat tinggi', .0174, .0160]];
+
+function todayISO() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+/** Masa kerja: selisih kalender dari tanggal mulai s/d tanggal akhir (default hari ini). */
+function tenure(start, end) {
+  const a = /^(\d{4})-(\d{2})-(\d{2})/.exec(start || ''), b = /^(\d{4})-(\d{2})-(\d{2})/.exec(end || todayISO());
+  if (!a || !b) return null;
+  let y = +b[1] - +a[1], m = +b[2] - +a[2], d = +b[3] - +a[3];
+  if (y < 0 || (y === 0 && (m < 0 || (m === 0 && d < 0)))) return null;
+  if (d < 0) { m--; d += new Date(+b[1], +b[2] - 1, 0).getDate(); }
+  if (m < 0) { y--; m += 12; }
+  return { y, m, d, days: (Date.UTC(+b[1], +b[2] - 1, +b[3]) - Date.UTC(+a[1], +a[2] - 1, +a[3])) / 864e5 };
+}
+const tenureText = t => t ? `${t.y} Tahun ${t.m} Bulan ${t.d} Hari` : '-';
+const empEnd = e => (e && e.status === 'PHK' && state.phkDates[e.empId]) || undefined;
+const empTenure = e => tenure(e && e.startDate, empEnd(e));
+
+const state = {
+  token: null, user: null, tab: 'dashboard', period: '',
+  settings: {}, employees: [], payroll: [], dashboard: null, batches: [],
+  kasbon: [], raises: [], phk: [], phkDates: {}, tax: { ptkp: {}, cat: {}, ter: {} }, summary: null, rptSel: new Set(), kasbonSaldo: [], raIds: [],
+  statuses: ['PKWTT','PKWT','Probation','Resign','Dirumahkan','PHK'], activeStatuses: ['PKWTT','PKWT','Probation'],
+  bulkRows: null
+};
+const empById = id => state.employees.find(e => e.empId === id);
+const isActive = e => e && state.activeStatuses.includes(e.status);
+
+function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
+function setLoading(on) { $('#loading').classList.toggle('on', !!on); }
+function toast(msg, type) {
+  const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg;
+  $('#toast').appendChild(t); setTimeout(() => t.remove(), type === 'err' ? 6000 : 3200);
+}
+function openModal(id) { $('#userMenu').classList.remove('open'); $('#' + id).classList.add('open'); }
+function closeModal(id) { $('#' + id).classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $$('.modal.open').forEach(m => m.classList.remove('open')); toggleNav(false); } });
+$$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('open'); }));
+document.addEventListener('click', e => { if (!e.target.closest('.user')) $('#userMenu').classList.remove('open'); });
+function toggleMenu(e) { e.stopPropagation(); $('#userMenu').classList.toggle('open'); }
+function toggleNav(force) { document.body.classList.toggle('nav-open', force === undefined ? !document.body.classList.contains('nav-open') : force); }
+function togglePw() { const i = $('#lgPass'); i.type = i.type === 'password' ? 'text' : 'password'; }
+const emptyRow = (cols, msg, icon) => `<tr><td colspan="${cols}" class="empty">${ic(icon || 'file', 'ic')}${msg}</td></tr>`;
+const empOptions = (list, ph) => `<option value="">${ph}</option>` + list.slice().sort((a, b) => a.name.localeCompare(b.name))
+  .map(e => `<option value="${esc(e.empId)}">${esc(e.empId)} - ${esc(e.name)}${e.jobSite ? ' (' + esc(e.jobSite) + ')' : ''}</option>`).join('');
+
+$$('img[data-logo]').forEach(i => i.src = LOGO);
+$('#yr').textContent = new Date().getFullYear();
+
+/* Pemanggil backend Apps Script */
+function gs(fn, ...args) {
+  return new Promise((resolve, reject) => {
+    google.script.run.withSuccessHandler(resolve).withFailureHandler(e => reject(new Error(e && e.message ? e.message : String(e)))) [fn](...args);
+  });
+}
+async function api(action, payload, opts = {}) {
+  if (!opts.silent) setLoading(true);
+  try {
+    const r = await gs('apiCall', state.token, action, payload || {});
+    if (!r || !r.ok) {
+      if (r && r.auth) { forceLogout(r.error); }
+      throw new Error((r && r.error) || 'Terjadi kesalahan.');
+    }
+    return r.data;
+  } finally { if (!opts.silent) setLoading(false); }
+}
+async function safe(fn) { try { return await fn(); } catch (e) { toast(e.message, 'err'); return null; } }
+
+/* ============================== AUTH =============================== */
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = $('#lgBtn'); btn.disabled = true; btn.textContent = 'Memproses...'; $('#loginErr').hidden = true;
+  try {
+    const r = await gs('login', $('#lgUser').value, $('#lgPass').value);
+    if (!r || !r.ok) throw new Error((r && r.error) || 'Gagal login.');
+    state.token = r.data.token; state.user = r.data;
+    store('pjm_token', state.token); store('pjm_user', JSON.stringify(r.data));
+    startApp();
+  } catch (err) { $('#loginErr').textContent = err.message; $('#loginErr').hidden = false; }
+  btn.disabled = false; btn.textContent = 'Masuk';
+});
+function forceLogout(msg) {
+  state.token = null; store('pjm_token', null); store('pjm_user', null);
+  $('#appView').hidden = true; $('#loginView').hidden = false;
+  if (msg) { $('#loginErr').textContent = msg; $('#loginErr').hidden = false; }
+}
+async function doLogout() { $('#userMenu').classList.remove('open'); try { await gs('logout', state.token); } catch (e) { } forceLogout(); $('#lgPass').value = ''; }
+
+function startApp() {
+  $('#loginView').hidden = true; $('#appView').hidden = false;
+  const nm = state.user ? (state.user.name || state.user.username) : '';
+  $('#userChip').textContent = nm; $('#userName2').textContent = nm; $('#userLogin').textContent = state.user ? '@' + state.user.username : '';
+  $('#avatar').textContent = (nm || 'A').trim().split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase();
+  if (!state.period) { const d = new Date(); state.period = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+  $('#period').value = state.period;
+  showTab(state.tab);
+  refresh();
+}
+/* Auto-login dari sesi tersimpan: dipanggil di akhir script (setelah semua halaman & fungsi siap). */
+function initApp() {
+  const tk = store('pjm_token'), us = store('pjm_user');
+  if (tk && us) { try { state.token = tk; state.user = JSON.parse(us); startApp(); } catch (e) { forceLogout(); } }
+}
+
+/* ============================== DATA =============================== */
+async function refresh() {
+  const d = await safe(() => api('snapshot', { period: state.period }));
+  if (!d) return;
+  Object.assign(state, {
+    settings: d.settings, employees: d.employees, payroll: d.payroll, dashboard: d.dashboard, batches: d.batches,
+    statuses: d.statuses, activeStatuses: d.activeStatuses, kasbon: d.kasbon || [], raises: d.raises || [], phk: d.phk || [],
+    phkDates: d.phkDates || {}, tax: d.tax || state.tax, summary: d.summary || null, kasbonSaldo: d.kasbonSaldo || []
+  });
+  $('#coName').textContent = state.settings.COMPANY_NAME || 'PT. Prohaba Jaya Mandiri';
+  renderAll();
+}
+$('#period').addEventListener('change', e => { if (/^\d{4}-\d{2}$/.test(e.target.value)) { state.period = e.target.value; refresh(); } });
+function shiftPeriod(n) {
+  const m = /^(\d{4})-(\d{2})$/.exec(state.period); if (!m) return;
+  const d = new Date(+m[1], +m[2] - 1 + n, 1);
+  state.period = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  $('#period').value = state.period; refresh();
+}
+
+const PAGES = {
+  dashboard: ['Dashboard', 'Ringkasan payroll, laporan gaji, dan transfer periode berjalan'],
+  employees: ['Master Karyawan', 'Data induk karyawan, masa kerja, dan rekening gaji'],
+  payroll: ['Payroll', 'Gaji Real: perhitungan gaji bersih per karyawan'],
+  kasbon: ['Kasbon', 'Pengajuan dan realisasi kasbon karyawan'],
+  batch: ['Batch Transfer Bank', 'Rekap transfer per bank dengan limit per batch'],
+  rptKes: ['Gaji BPJS', 'Gaji & iuran BPJS Kesehatan dan Ketenagakerjaan dengan aturan tersendiri'],
+  rptTax: ['Gaji Pajak', 'Penghasilan bruto untuk dasar PPh 21 (TER) dengan aturan tersendiri'],
+  mutasi: ['Mutasi Karyawan', 'Karyawan baru, kenaikan gaji, dan PHK']
+};
+function showTab(t) {
+  if (!PAGES[t]) t = 'dashboard';
+  state.tab = t;
+  $$('#nav .nav-item').forEach(b => b.classList.toggle('active', !b.classList.contains('nav-parent') && b.dataset.tab === t));
+  $('#nav .nav-parent').classList.toggle('parent-on', ['payroll', 'kasbon', 'batch'].includes(t));
+  Object.keys(PAGES).forEach(k => $('#tab-' + k).hidden = k !== t);
+  $('#pgTitle').textContent = PAGES[t][0];
+  $('#pgSub').textContent = PAGES[t][1] + ' · ' + periodLabel(state.period);
+  toggleNav(false); window.scrollTo(0, 0); fixHeads();
+}
+$('#nav').addEventListener('click', e => { const b = e.target.closest('.nav-item'); if (b && b.dataset.tab) showTab(b.dataset.tab); });
+
+function renderAll() {
+  const pl = periodLabel(state.period);
+  ['#payPeriodLbl','#kasPeriodLbl','#dashPeriod'].forEach(s => $(s).textContent = pl);
+  $$('.mutPeriod, .kasPer, .subPer').forEach(x => x.textContent = pl);
+  $('#pgSub').textContent = PAGES[state.tab][1] + ' · ' + pl;
+  renderDashboard(); renderEmpFilters(); renderEmpTable(); renderPayroll(); renderKasbon(); renderBatches();
+  renderMutasi(); Object.keys(SUB).forEach(renderSub); renderKasSaldo(); fillDatalists(); fixHeads();
+}
+
+/* Masa kerja dihitung terhadap tanggal hari ini: perbarui otomatis bila tanggal berganti (aplikasi dibiarkan terbuka). */
+state.rptSel = new Set();
+let lastDay = todayISO();
+setInterval(() => { const t = todayISO(); if (t !== lastDay) { lastDay = t; if (state.employees.length) { renderEmpTable(); renderMutasi(); } } }, 60000);
+
+function fillDatalists() {
+  const uniq = k => [...new Set(state.employees.map(e => e[k]).filter(Boolean))].sort();
+  $('#dlDept').innerHTML = uniq('dept').map(v => `<option value="${esc(v)}">`).join('');
+  $('#dlSite').innerHTML = uniq('jobSite').map(v => `<option value="${esc(v)}">`).join('');
+  $('#dlBank').innerHTML = [...new Set([...BANKS, ...uniq('bank')])].map(v => `<option value="${esc(v)}">`).join('');
+}
+const siteFilterOpts = (sel, rows) => {
+  const cur = $(sel).value, sites = [...new Set(rows.map(r => r.jobSite).filter(Boolean))].sort();
+  $(sel).innerHTML = '<option value="">Semua Job Site</option>' + sites.map(s => `<option ${s === cur ? 'selected' : ''}>${esc(s)}</option>`).join('');
+};
+
+/* ============================ DASHBOARD ============================ */
+function renderDashboard() {
+  const d = state.dashboard; if (!d) return;
+  const stat = (cls, chip, icon, lbl, val, foot) => `<div class="stat ${cls}"><div class="stat-top"><span class="lbl">${lbl}</span><span class="chip ${chip}">${ic(icon)}</span></div>
+    <div class="val num">${val}</div><div class="foot">${foot}</div></div>`;
+  const nb = state.batches.reduce((a, b) => a + b.batches.length, 0), nt = state.batches.reduce((a, b) => a + b.count, 0);
+  $('#metrics').innerHTML =
+    stat('', 'hi-blue', 'users', 'Headcount Real', `${nf(d.headcount)} <small>karyawan</small>`, `${nf(d.payrollRows)} baris gaji periode ini`) +
+    stat('', 'hi-green', 'card', 'Total Gaji Bersih', rp(d.totalThp), 'Take Home Pay ' + esc(periodLabel(state.period))) +
+    stat('', d.drafts ? 'hi-orange' : 'hi-green', d.drafts ? 'info' : 'check', 'Status Data Payroll', d.drafts ? `${nf(d.drafts)} <small>draft</small>` : (d.payrollRows ? 'Final' : '-'),
+      d.drafts ? 'Perlu dikoreksi & dikonfirmasi' : (d.payrollRows ? 'Semua baris sudah dikonfirmasi' : 'Belum ada payroll')) +
+    stat('hero', '', 'send', 'Total Transfer Bank', rp(d.totalTransfer), `${nf(nt)} transfer &middot; ${nf(state.batches.length)} bank &middot; ${nf(nb)} batch`);
+  const P = state.period;
+  const active = state.employees.filter(isActive).length;
+  const baru = state.employees.filter(e => (e.startDate || '').slice(0, 7) === P).length;
+  const cair = state.kasbon.filter(k => k.status === 'Cair' && k.period === P), pend = state.kasbon.filter(k => k.status !== 'Cair');
+  const sum = (a, k) => a.reduce((s, r) => s + (+r[k] || 0), 0);
+  const pph = state.payroll.reduce((s, r) => s + (+r.rptPph || 0), 0);
+  const mini = (k, v, s) => `<div><div class="k">${k}</div><div class="v num">${v}</div><div class="s">${s}</div></div>`;
+  $('#miniStats').innerHTML =
+    mini('Karyawan aktif', nf(active), `dari ${nf(state.employees.length)} total karyawan`) +
+    mini('Karyawan baru', nf(baru), 'mulai bekerja bulan ini') +
+    mini('Kenaikan gaji', nf(state.raises.length), 'karyawan') +
+    mini('PHK', nf(state.phk.length), 'karyawan') +
+    mini('Kasbon cair', rp(sum(cair, 'amount')), `${cair.length} pengajuan direalisasi`) +
+    mini('Kasbon belum realisasi', rp(sum(pend, 'amount')), `${pend.length} pengajuan`) +
+    mini('Iuran BPJS (Gaji BPJS)', rp(sum(state.payroll, 'bTotal')), 'pekerja + pemberi kerja') +
+    mini('Estimasi PPh 21 (Gaji Pajak)', rp(pph), 'metode TER (informasi)');
+  const list = (rows, kind) => {
+    if (!rows.length) return `<div class="empty">${ic('bank', 'ic')}Belum ada data transfer pada periode ini.</div>`;
+    const max = Math.max(...rows.map(r => r.total), 1);
+    return `<div class="table-wrap"><table><thead><tr><th>${kind}</th><th class="num">Headcount</th><th class="num">Total Gaji Bersih</th></tr></thead><tbody>` +
+      rows.map(r => `<tr><td><span class="cell-main">${esc(r.name)}</span><div class="bar"><i style="width:${(r.total / max * 100).toFixed(1)}%"></i></div></td>
+        <td class="num">${nf(r.headcount)}</td><td class="num c-green">${nf(r.total)}</td></tr>`).join('') + '</tbody></table></div>';
+  };
+  renderCompare();
+  $('#byBank').innerHTML = list(d.byBank, 'Bank');
+  $('#bySite').innerHTML = list(d.bySite, 'Job Site');
+}
+
+/* ============================ KARYAWAN ============================= */
+function renderEmpFilters() {
+  const keep = { d: $('#fDept').value, s: $('#fSite').value, st: $('#fStatus').value };
+  const opts = (label, vals, cur) => `<option value="">${label}</option>` + vals.map(v => `<option ${v === cur ? 'selected' : ''}>${esc(v)}</option>`).join('');
+  const uniq = k => [...new Set(state.employees.map(e => e[k]).filter(Boolean))].sort();
+  $('#fDept').innerHTML = opts('Semua Departemen', uniq('dept'), keep.d);
+  $('#fSite').innerHTML = opts('Semua Job Site', uniq('jobSite'), keep.s);
+  $('#fStatus').innerHTML = opts('Semua Status', state.statuses, keep.st);
+  $('#eStatus').innerHTML = state.statuses.map(s => `<option>${s}</option>`).join('');
+  $('#ePtkp').innerHTML = '<option value="">- belum diisi -</option>' + PTKP_LIST.map(p => `<option>${p}</option>`).join('');
+}
+['fSearch','fDept','fSite','fStatus','fSort'].forEach(id => $('#' + id).addEventListener(id === 'fSearch' ? 'input' : 'change', renderEmpTable));
+const stBadge = s => `<span class="badge st-${esc(String(s).replace(/[^A-Za-z]/g, ''))}">${esc(s)}</span>`;
+
+function renderEmpTable() {
+  const q = $('#fSearch').value.trim().toLowerCase();
+  const dep = $('#fDept').value, site = $('#fSite').value, st = $('#fStatus').value, sort = $('#fSort').value;
+  let rows = state.employees.filter(e =>
+    (!dep || e.dept === dep) && (!site || e.jobSite === site) && (!st || e.status === st) &&
+    (!q || [e.name, e.empId, e.position, e.bank, e.accNo].some(v => String(v || '').toLowerCase().includes(q))));
+  const idNum = e => parseInt(String(e.empId).replace(/\D/g, ''), 10) || 0;
+  const tDays = e => { const t = empTenure(e); return t ? t.days : -1; };
+  rows.sort((a, b) => sort === 'name-asc' ? a.name.localeCompare(b.name) : sort === 'name-desc' ? b.name.localeCompare(a.name)
+    : sort === 'id-asc' ? idNum(a) - idNum(b) : sort === 'id-desc' ? idNum(b) - idNum(a)
+    : sort === 'ten-desc' ? tDays(b) - tDays(a) : tDays(a) - tDays(b));
+  $('#empCount').textContent = `${rows.length} dari ${state.employees.length} karyawan`;
+  $('#empBody').innerHTML = rows.length ? rows.map(e => {
+    const t = empTenure(e);
+    return `<tr>
+    <td class="mono">${esc(e.empId)}</td>
+    <td><span class="cell-main">${esc(e.name)}</span><div class="small">${esc(e.email)}${e.email && e.phone ? ' &middot; ' : ''}${esc(e.phone)}</div></td>
+    <td>${stBadge(e.status)}</td>
+    <td>${esc(e.dept) || '-'}<div class="small">${esc(e.position)}</div></td><td>${esc(e.jobSite) || '-'}</td>
+    <td><b>${esc(e.bank)}</b><div class="mono small">${esc(e.accNo)}</div></td>
+    <td class="nowrap">${fmtDate(e.startDate)}</td>
+    <td class="tenure" title="${empEnd(e) ? 's/d tanggal PHK ' + fmtDate(empEnd(e)) : 's/d hari ini'}">${t ? `<b>${t.y}</b> Thn <b>${t.m}</b> Bln <b>${t.d}</b> Hr` : '<span class="muted">-</span>'}</td>
+    <td>${e.ptkp ? `<span class="badge b-ptkp">${esc(e.ptkp)}</span>` : '<span class="muted">-</span>'}</td>
+    <td class="acts"><button class="btn btn-ghost btn-sm" onclick="openEmp('${esc(e.empId)}')">${ic('edit')}Ubah</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delEmp('${esc(e.empId)}')">${ic('trash')}</button></td></tr>`;
+  }).join('') : emptyRow(10, 'Tidak ada karyawan yang cocok.', 'users');
+}
+
+function openEmp(id) {
+  const e = empById(id) || { status: 'PKWT' };
+  $('#mEmpTitle').textContent = id ? 'Ubah Karyawan ' + id : 'Karyawan Baru';
+  $('#eId').value = e.empId || ''; $('#eName').value = e.name || ''; $('#eEmail').value = e.email || '';
+  $('#ePhone').value = e.phone || ''; $('#eStatus').value = e.status || 'PKWT'; $('#eDept').value = e.dept || '';
+  $('#ePos').value = e.position || ''; $('#eStart').value = e.startDate || ''; $('#eSite').value = e.jobSite || '';
+  $('#eBank').value = e.bank || ''; $('#eAcc').value = e.accNo || ''; $('#ePtkp').value = e.ptkp || '';
+  $('#eTenure').value = tenureText(tenure(e.startDate, empEnd(e)));
+  openModal('mEmp');
+}
+$('#eStart').addEventListener('input', () => $('#eTenure').value = tenureText(tenure($('#eStart').value, empEnd(empById($('#eId').value)))));
+$('#empForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await safe(() => api('saveEmployee', {
+    empId: $('#eId').value, name: $('#eName').value, email: $('#eEmail').value, phone: $('#ePhone').value,
+    status: $('#eStatus').value, dept: $('#eDept').value, position: $('#ePos').value, startDate: $('#eStart').value,
+    jobSite: $('#eSite').value, bank: $('#eBank').value, accNo: $('#eAcc').value, ptkp: $('#ePtkp').value
+  }));
+  if (r) { closeModal('mEmp'); toast('Karyawan tersimpan: ' + r.empId, 'ok'); refresh(); }
+});
+async function delEmp(id) {
+  const e = empById(id);
+  if (!confirm(`Hapus karyawan ${e ? e.name : id}?`)) return;
+  const r = await safe(() => api('deleteEmployee', { empId: id }));
+  if (r) { toast('Karyawan dihapus.', 'ok'); refresh(); }
+}
+
+/* Template & import karyawan */
+const EMP_HEADERS = ['ID Karyawan (kosongkan jika baru)','Nama Lengkap','Email','No WA/Telepon','Status (PKWTT/PKWT/Probation/Resign/Dirumahkan/PHK)','Departemen','Jabatan','Tanggal Mulai Bekerja (YYYY-MM-DD)','Job Site','Bank','No Rekening','Status PTKP (TK/0 s.d. K/3)'];
+function downloadEmpTemplate() {
+  const d = $('#csvDelim').value || ';';
+  const sample = ['', 'Contoh Nama Karyawan', 'nama@email.com', '081234567890', 'PKWT', 'Operasional', 'Operator', '2026-01-05', 'Site Balikpapan', 'BCA', '1234567890', 'TK/0'];
+  downloadFile('Template_Master_Karyawan_PJM.csv', toCSV([EMP_HEADERS, sample], d), 'text/csv');
+  toast('Template diunduh. Pastikan kolom No Rekening/No WA berformat Text di Excel.');
+}
+async function importEmpSheet() {
+  const url = $('#impUrl').value.trim(); if (!url) return toast('Masukkan URL Google Sheets.', 'err');
+  const r = await safe(() => api('importEmployees', { url })); if (r) showImpResult(r);
+}
+async function importEmpCsv() {
+  const f = $('#impFile').files[0]; if (!f) return toast('Pilih file CSV terlebih dahulu.', 'err');
+  const rows = parseCSV(await readText(f)); if (!rows.length) return toast('File kosong atau format tidak dikenali.', 'err');
+  const r = await safe(() => api('importEmployees', { rows })); if (r) showImpResult(r);
+}
+function showImpResult(r) {
+  $('#impResult').innerHTML = `<div class="resultbox ok"><b>${r.added} karyawan ditambahkan, ${r.updated} diperbarui.</b>` +
+    (r.errors.length ? `<ul>${r.errors.map(x => `<li class="c-red">Baris ${x.line}: ${esc(x.msg)}</li>`).join('')}</ul>` : '') + '</div>';
+  refresh();
+}
+
+/* ============================== PAYROLL ============================ */
+/* Potongan BPJS pekerja diinput manual (tanpa rumus persen). */
+function calcClient(gp, tl, thr, kas, pot, jht, jp, kes) {
+  [gp, tl, thr, kas, pot, jht, jp, kes] = [gp, tl, thr, kas, pot, jht, jp, kes].map(v => +v || 0);
+  const bruto = gp + tl + thr, totalPeng = pot + jht + jp + kes;
+  return { bruto, jht, jp, kes, totalPeng, thp: bruto - totalPeng, sisa: kas - pot };
+}
+['payQ','paySite','payStatus'].forEach(id => $('#' + id).addEventListener(id === 'payQ' ? 'input' : 'change', renderPayroll));
+function renderPayroll() {
+  siteFilterOpts('#paySite', state.payroll);
+  const q = $('#payQ').value.trim().toLowerCase(), site = $('#paySite').value, st = $('#payStatus').value;
+  const rows = state.payroll.filter(r => (!site || r.jobSite === site) && (!st || (r.status || 'FINAL') === st) && (!q || [r.name, r.empId, r.bank, r.accNo].some(v => String(v || '').toLowerCase().includes(q))));
+  const cnt = {}; state.payroll.forEach(r => cnt[r.empId] = (cnt[r.empId] || 0) + 1);
+  $('#payCount').textContent = state.payroll.length ? `${rows.length} dari ${state.payroll.length} baris` : '';
+  const drafts = state.payroll.filter(r => r.status === 'DRAFT').length;
+  $('#btnConfirmAll').disabled = !drafts; $('#btnConfirmAll span').textContent = `Konfirmasi Semua (${drafts})`;
+  $('#btnConfirmAll').title = drafts ? 'Konfirmasi semua baris DRAFT' : 'Tidak ada data DRAFT. Gunakan Salin dari Bulan Lalu untuk membuat draft.';
+  $('#payDraftNote').hidden = !drafts;
+  $('#payDraftNote').innerHTML = `${ic('info', 'ic')}<div><b>${drafts} baris payroll berstatus DRAFT</b> (hasil salin). Periksa dan koreksi lewat tombol ${ic('edit')} lalu klik <b>Konfirmasi</b> per baris atau <b>Konfirmasi Semua</b>. Data draft sudah ikut dihitung di total &amp; batch transfer.</div>`;
+  $('#payBody').innerHTML = rows.length ? rows.map(r => `<tr>
+    <td class="sticky-col" style="min-width:210px"><span class="cell-main">${esc(r.name)}</span> ${cnt[r.empId] > 1 ? '<span class="badge b-dup" title="ID sama = 1 headcount">entri ganda</span>' : ''}
+      <div class="small"><span class="mono">${esc(r.empId)}</span> &middot; ${esc(r.bank)} <span class="mono">${esc(r.accNo)}</span> <span class="badge b-src">${esc(r.source)}</span>${r.status === 'DRAFT' ? ' <span class="badge b-draft">DRAFT</span>' : ''}</div></td>
+    <td class="nowrap">${esc(r.jobSite) || '-'}</td>
+    <td class="num bl">${nf(r.gp)}</td><td class="num">${nf(r.tl)}</td><td class="num">${nf(r.thr)}</td>
+    <td class="num bl tot-in">${nf(r.bruto)}</td>
+    <td class="num bl">${nf(r.kasLalu)}</td><td class="num">${nf(r.sisaKas)}</td>
+    <td class="num bl">${nf(r.potKas)}</td><td class="num">${nf(r.jht)}</td><td class="num">${nf(r.jp)}</td><td class="num">${nf(r.kes)}</td>
+    <td class="num bl tot-out"${payMismatch(r) ? ` title="Rincian = ${nf(+r.potKas + +r.jht + +r.jp + +r.kes)}"` : ''}>${payMismatch(r) ? '<span class="badge b-na" style="margin-right:4px">!</span>' : ''}${nf(r.totalPeng)}</td>
+    <td class="num bl net">${nf(r.thp)}</td>
+    <td class="acts bl">${r.status === 'DRAFT' ? `<button class="btn btn-success btn-sm" title="Konfirmasi" onclick="confirmPay('${esc(r.id)}')">${ic('check')}Konfirmasi</button>` : ''}<button class="btn btn-ghost btn-sm btn-icon" title="Edit / koreksi" onclick="openPayEdit('${esc(r.id)}')">${ic('edit')}</button><button class="btn btn-ghost btn-sm" onclick="pdfSlip('${esc(r.id)}')">${ic('file')}Slip</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delPay('${esc(r.id)}')">${ic('trash')}</button></td></tr>`).join('')
+    : emptyRow(15, state.payroll.length ? 'Tidak ada data yang cocok dengan filter.' : 'Belum ada payroll pada periode ini. Gunakan Input Payroll atau Bulk Payroll.', 'card');
+  const bad = state.payroll.filter(payMismatch).length;
+  $('#payMismatch').hidden = !bad;
+  $('#payMismatch').innerHTML = `${ic('info', 'ic')}<div style="flex:1"><b>${bad} baris</b>: Jumlah Pengurang / Gaji Bersih tidak sama dengan rinciannya (Pot. Kasbon + JHT + JP + BPJS Kes). Biasanya karena kolom diubah langsung di Google Sheets.</div><button class="btn btn-amber btn-sm" onclick="openRecalc()">${ic('check')}Periksa &amp; Hitung Ulang</button>`;
+  const sum = k => rows.reduce((a, r) => a + (+r[k] || 0), 0);
+  const heads = new Set(rows.map(r => r.empId)).size;
+  $('#payFoot').innerHTML = rows.length ? `<tr><td class="sticky-col">TOTAL (${heads} headcount real)</td><td></td>
+    ${['gp','tl','thr'].map((k, i) => `<td class="num${i ? '' : ' bl'}">${nf(sum(k))}</td>`).join('')}
+    <td class="num bl tot-in">${nf(sum('bruto'))}</td><td class="num bl">${nf(sum('kasLalu'))}</td><td class="num">${nf(sum('sisaKas'))}</td>
+    ${['potKas','jht','jp','kes'].map((k, i) => `<td class="num${i ? '' : ' bl'}">${nf(sum(k))}</td>`).join('')}
+    <td class="num bl tot-out">${nf(sum('totalPeng'))}</td><td class="num bl net">${nf(sum('thp'))}</td><td class="bl"></td></tr>` : '';
+}
+async function delPay(id) {
+  if (!confirm('Hapus baris payroll ini?')) return;
+  const r = await safe(() => api('deletePayroll', { id })); if (r) { toast('Baris payroll dihapus.', 'ok'); refresh(); }
+}
+
+/* Baris yang total-nya tidak sama dengan rinciannya (data diubah langsung di sheet). */
+function payMismatch(r) {
+  const n = k => +r[k] || 0, bruto = n('gp') + n('tl') + n('thr'), peng = n('potKas') + n('jht') + n('jp') + n('kes');
+  return bruto !== n('bruto') || peng !== n('totalPeng') || bruto - peng !== n('thp') || n('kasLalu') - n('potKas') !== n('sisaKas');
+}
+async function openRecalc() {
+  const r = await safe(() => api('recalcPeriod', { period: state.period })); if (!r) return;
+  const L = r.rows, dOld = L.reduce((a, x) => a + x.oldThp, 0), dNew = L.reduce((a, x) => a + x.newThp, 0);
+  $('#rcBody').innerHTML = L.length ? `<div class="callout warn" style="margin-bottom:12px">${ic('info', 'ic')}<div><b>${L.length} baris</b> akan dihitung ulang dari rincian yang tersimpan.
+      Total Gaji Bersih berubah dari <b>${rp(dOld)}</b> menjadi <b>${rp(dNew)}</b> (${dNew - dOld >= 0 ? '+' : ''}${nf(dNew - dOld)}). Nominal Batch Transfer periode ini ikut berubah.</div></div>
+    <div class="table-wrap boxed" style="max-height:46vh;overflow:auto"><table><thead><tr><th>Karyawan</th><th class="num">Pengurang Lama</th><th class="num">Pengurang Baru</th><th class="num">Gaji Bersih Lama</th><th class="num">Gaji Bersih Baru</th></tr></thead><tbody>
+    ${L.map(x => `<tr><td><span class="cell-main">${esc(x.name)}</span><div class="small mono">${esc(x.empId)}</div></td><td class="num c-red">${nf(x.oldPeng)}</td><td class="num"><b>${nf(x.newPeng)}</b></td><td class="num">${nf(x.oldThp)}</td><td class="num c-green">${nf(x.newThp)}</td></tr>`).join('')}
+    </tbody></table></div>` : `<div class="empty">${ic('check', 'ic')}Semua baris sudah sesuai. Tidak ada yang perlu dihitung ulang.</div>`;
+  $('#rcBody').innerHTML += r.errors.length ? `<div class="resultbox" style="background:var(--red-50);color:var(--red)">Tidak bisa dihitung:<ul>${r.errors.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+  $('#rcApply').disabled = !L.length; $('#rcApply').textContent = `Terapkan ke ${L.length} baris`;
+  openModal('mRecalc');
+}
+async function applyRecalc() {
+  if (!confirm(`Hitung ulang & simpan Jumlah Pengurang dan Gaji Bersih periode ${periodLabel(state.period)}?`)) return;
+  const r = await safe(() => api('recalcPeriod', { period: state.period, apply: true }));
+  if (r) { closeModal('mRecalc'); toast(`${r.applied} baris dihitung ulang.`, 'ok'); refresh(); }
+}
+
+function openPay() {
+  const act = state.employees.filter(isActive);
+  if (!act.length) return toast('Belum ada karyawan aktif di Master Data.', 'err');
+  $('#payFormPeriod').textContent = periodLabel(state.period);
+  $('#pEmp').innerHTML = empOptions(act, '-- pilih karyawan --'); $('#pEmp').disabled = false;
+  ['pGp','pTl','pThr','pKasLalu','pPot','pJht','pJp','pKes'].forEach(i => $('#' + i).value = 0);
+  $('#pDupHint').hidden = true; $('#pId').value = ''; $('#pConfirmWrap').hidden = true; $('#pConfirm').checked = false;
+  $('#mPayTitle').textContent = 'Input Payroll'; $('#pSubmit').textContent = 'Simpan Payroll';
+  updatePayPreview(); openModal('mPay');
+}
+/* Edit / koreksi satu baris payroll (Gaji Real) */
+function openPayEdit(id) {
+  const r = state.payroll.find(x => x.id === id); if (!r) return;
+  $('#payFormPeriod').textContent = periodLabel(r.period);
+  $('#pEmp').innerHTML = `<option value="${esc(r.empId)}">${esc(r.empId)} - ${esc(r.name)}</option>`; $('#pEmp').disabled = true;
+  $('#pGp').value = r.gp; $('#pTl').value = r.tl; $('#pThr').value = r.thr; $('#pKasLalu').value = r.kasLalu; $('#pPot').value = r.potKas;
+  $('#pJht').value = r.jht; $('#pJp').value = r.jp; $('#pKes').value = r.kes;
+  $('#pId').value = id; $('#pDupHint').hidden = true;
+  $('#pConfirmWrap').hidden = r.status !== 'DRAFT'; $('#pConfirm').checked = false;
+  $('#mPayTitle').textContent = 'Edit Payroll ' + r.name; $('#pSubmit').textContent = 'Simpan Perubahan';
+  updatePayPreview(); openModal('mPay');
+}
+async function confirmPay(id) {
+  const r = await safe(() => api('confirmPayroll', { period: state.period, ids: [id] }));
+  if (r) { toast('Payroll dikonfirmasi.', 'ok'); refresh(); }
+}
+async function confirmAll() {
+  const n = state.payroll.filter(r => r.status === 'DRAFT').length;
+  if (!n || !confirm(`Konfirmasi ${n} baris payroll DRAFT periode ${periodLabel(state.period)}?\nPastikan data sudah dikoreksi.`)) return;
+  const r = await safe(() => api('confirmPayroll', { period: state.period }));
+  if (r) { toast(`${r.count} baris payroll dikonfirmasi.`, 'ok'); refresh(); }
+}
+$('#pEmp').addEventListener('change', async () => {
+  const id = $('#pEmp').value; if (!id) return;
+  const dup = state.payroll.find(r => r.empId === id);
+  $('#pDupHint').hidden = !dup;
+  if (dup) $('#pDupHint').innerHTML = `<span class="c-red">Karyawan ini sudah memiliki payroll periode ini (Gaji Bersih ${rp(dup.thp)}). Menyimpan akan menggantikan data lama.</span>`;
+  const r = await safe(() => api('getKasbon', { period: state.period, empId: id }, { silent: true }));
+  if (r) { $('#pKasLalu').value = r.kasLalu; updatePayPreview(); }
+});
+['pGp','pTl','pThr','pKasLalu','pPot','pJht','pJp','pKes'].forEach(i => $('#' + i).addEventListener('input', updatePayPreview));
+function updatePayPreview() {
+  const c = calcClient($('#pGp').value, $('#pTl').value, $('#pThr').value, $('#pKasLalu').value, $('#pPot').value, $('#pJht').value, $('#pJp').value, $('#pKes').value);
+  const row = (l, v, cls) => `<div class="row ${cls || ''}"><span>${l}</span><span class="num">${v}</span></div>`;
+  $('#payPreview').innerHTML = `<div class="small" style="margin-bottom:6px">Pratinjau kalkulasi (angka final dihitung ulang oleh server)</div>` +
+    row('Penghasilan Bruto', rp(c.bruto)) + row('Potongan Kasbon', '- ' + rp($('#pPot').value || 0)) +
+    row('BPJS JHT Pekerja', '- ' + rp(c.jht)) + row('BPJS JP Pekerja', '- ' + rp(c.jp)) +
+    row('BPJS Kesehatan Pekerja', '- ' + rp(c.kes)) + row('Total Pengurang', rp(c.totalPeng)) +
+    row('Sisa Kasbon Bulan Ini', rp(c.sisa)) + row('Gaji Bersih (Take Home Pay)', rp(c.thp), 'total');
+}
+$('#payForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if ($('#pId').value) {
+    const r = await safe(() => api('updatePayroll', { id: $('#pId').value, gp: $('#pGp').value, tl: $('#pTl').value, thr: $('#pThr').value, kasLalu: $('#pKasLalu').value, potKas: $('#pPot').value, jht: $('#pJht').value, jp: $('#pJp').value, kes: $('#pKes').value, confirm: $('#pConfirm').checked }));
+    if (r) { closeModal('mPay'); toast('Payroll ' + r.name + ' diperbarui.', 'ok'); refresh(); }
+    return;
+  }
+  const id = $('#pEmp').value, dup = state.payroll.find(r => r.empId === id);
+  if (dup && !confirm(`${dup.name} sudah memiliki payroll periode ${periodLabel(state.period)}.\nGanti data lama dengan input ini?`)) return;
+  const r = await safe(() => api('savePayroll', { period: state.period, empId: id, gp: $('#pGp').value, tl: $('#pTl').value, thr: $('#pThr').value, kasLalu: $('#pKasLalu').value, potKas: $('#pPot').value, jht: $('#pJht').value, jp: $('#pJp').value, kes: $('#pKes').value, replace: !!dup }));
+  if (r) { closeModal('mPay'); toast('Payroll ' + r.name + ' tersimpan.', 'ok'); refresh(); }
+});
+
+/* ======================= SALIN PAYROLL DARI BULAN LALU ===================== */
+const prevPeriodOf = p => { const m = /^(\d{4})-(\d{2})$/.exec(p); if (!m) return p; const d = new Date(+m[1], +m[2] - 2, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+function openCopy() {
+  $('#cpFrom').value = prevPeriodOf(state.period); $('#cpTo').value = periodLabel(state.period);
+  $('#cpThr').checked = false; $('#cpResult').innerHTML = ''; $('#cpBtn').disabled = false;
+  if (state.payroll.length) $('#cpResult').innerHTML = `<div class="callout warn" style="margin-top:12px">${ic('info', 'ic')}<div>Periode ${esc(periodLabel(state.period))} sudah berisi ${state.payroll.length} baris payroll. Karyawan tersebut akan dilewati (tidak ditimpa).</div></div>`;
+  openModal('mCopy');
+}
+$('#copyForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const from = $('#cpFrom').value;
+  if (!/^\d{4}-\d{2}$/.test(from)) return toast('Pilih periode asal.', 'err');
+  if (from === state.period) return toast('Periode asal dan tujuan tidak boleh sama.', 'err');
+  const r = await safe(() => api('copyPayroll', { from, to: state.period, includeThr: $('#cpThr').checked })); if (!r) return;
+  const li = a => a.length ? `<ul>${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  $('#cpResult').innerHTML = `<div class="resultbox ok"><b>${r.copied} baris disalin sebagai DRAFT</b> dari ${esc(periodLabel(from))}.` +
+    `${r.raised ? ` ${r.raised} karyawan memakai Gaji Baru (naik gaji).` : ''}${r.skipExist ? ` ${r.skipExist} dilewati karena sudah ada.` : ''}` +
+    (r.inactive.length ? `<div style="margin-top:6px">Dilewati (tidak aktif):</div>${li(r.inactive)}` : '') +
+    (r.errors.length ? `<div class="c-red" style="margin-top:6px">Gagal:</div>${li(r.errors)}` : '') + '</div>';
+  $('#cpBtn').disabled = true;
+  toast(`${r.copied} baris payroll draft dibuat. Silakan koreksi & konfirmasi.`, 'ok');
+  refresh();
+});
+
+/* ===================== DASHBOARD: REALISASI & 3 JENIS GAJI =================== */
+function deltaHtml(cur, prev) {
+  if (!prev && !cur) return '<span class="delta eq">0%</span>';
+  if (!prev) return '<span class="delta up">baru</span>';
+  const p = (cur - prev) / prev * 100, cls = Math.abs(p) < 0.05 ? 'eq' : p > 0 ? 'up' : 'down';
+  return `<span class="delta ${cls}">${cls === 'up' ? '▲' : cls === 'down' ? '▼' : ''} ${Math.abs(p).toFixed(1).replace('.', ',')}%</span>`;
+}
+function renderCompare() {
+  const S = state.summary; if (!S) { $('#stats3').innerHTML = ''; return; }
+  const c = S.cur, p = S.prev, pl = periodLabel(p.period);
+  const card = (cls, chip, icon, lbl, k, foot) => `<div class="stat ${cls}"><div class="stat-top"><span class="lbl">${lbl}</span><span class="chip ${chip}">${ic(icon)}</span></div>
+    <div class="val num">${rp(c[k])}</div><div class="cmp">${deltaHtml(c[k], p[k])}<span>vs ${esc(pl)}: ${rp(p[k])}</span></div><div class="foot">${foot}</div></div>`;
+  $('#stats3').innerHTML =
+    card('', 'hi-green', 'card', '1. Gaji Real (Take Home Pay)', 'thp', 'Gaji bersih yang diterima karyawan') +
+    card('', 'hi-blue', 'shield', '2. Gaji BPJS', 'kesSetor', 'Dasar iuran BPJS Kesehatan & Ketenagakerjaan') +
+    card('hero', '', 'receipt', '3. Gaji Pajak', 'taxSetor', 'Dasar PPh 21 (bruto TER)');
+  $('#cmpHead').innerHTML = `<tr><th>Realisasi</th><th class="num">${esc(pl)}</th><th class="num cur">${esc(periodLabel(c.period))}</th><th class="num">Selisih</th><th class="num">Perubahan</th></tr>`;
+  const rows = [['Headcount (karyawan)', 'headcount', false], ['Gaji Real (Take Home Pay)', 'thp', true], ['Gaji BPJS', 'kesSetor', true],
+    ['Gaji Pajak', 'taxSetor', true]];
+  $('#cmpBody').innerHTML = rows.map(([l, k, money]) => { const d = c[k] - p[k], f = nf;
+    return `<tr><td class="lbl">${l}</td><td class="num">${f(p[k])}</td><td class="num cur"><b>${f(c[k])}</b></td><td class="num ${d > 0 ? 'c-green' : d < 0 ? 'c-red' : ''}">${d > 0 ? '+' : ''}${f(d)}</td><td class="num">${deltaHtml(c[k], p[k])}</td></tr>`; }).join('');
+  $('#cmpNote').textContent = c.drafts ? `${c.drafts} baris bulan ini masih DRAFT` : (c.rows ? 'Semua data bulan ini sudah dikonfirmasi' : '');
+}
+
+const rsum = (a, k) => a.reduce((s, r) => s + (+r[k] || 0), 0);
+
+/* ================== EDIT PER ORANG (Gaji BPJS / Gaji Pajak) ================== */
+function openRep(id, mode) {
+  const r = state.payroll.find(x => x.id === id); if (!r) return;
+  $('#rpId').value = id; $('#rpMode').value = mode; $('#rpWho').textContent = `${r.name} · ${r.empId} · ${periodLabel(r.period)}`;
+  $('#rpTitle').textContent = mode === 'kes' ? 'Edit Gaji BPJS' : 'Edit Gaji Pajak';
+  $('#rpKesWrap').hidden = mode !== 'kes'; $('#rpTaxWrap').hidden = mode !== 'tax'; $('#rpPtkpWrap').hidden = mode !== 'tax';
+  $('#rpKes').value = r.kesManual ? r.kesSetor : ''; $('#rpKesAuto').textContent = rp(r.kesAuto);
+  $('#rpTax').value = r.taxManual ? r.taxSetor : ''; $('#rpTaxAuto').textContent = rp(r.taxAuto);
+  $('#rpPtkp').innerHTML = '<option value="">- belum diisi -</option>' + PTKP_LIST.map(p => `<option>${p}</option>`).join(''); $('#rpPtkp').value = r.ptkp || '';
+  openModal('mRep');
+}
+$('#repForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = $('#rpId').value, mode = $('#rpMode').value, r = state.payroll.find(x => x.id === id);
+  const v = (mode === 'kes' ? $('#rpKes') : $('#rpTax')).value.trim(), ptkp = $('#rpPtkp').value;
+  const ok = await safe(async () => {
+    await api('setReportBase', { period: state.period, ids: [id], field: mode === 'kes' ? 'kesBase' : 'taxBaseOv', mode: v === '' ? 'auto' : 'value', value: v });
+    if (mode === 'tax' && ptkp && r && ptkp !== r.ptkp) await api('setPtkp', { empIds: [r.empId], ptkp });
+    return true;
+  });
+  if (ok) { closeModal('mRep'); toast('Tersimpan.', 'ok'); refresh(); }
+});
+
+/* ======================= EDIT SEMUA (sesuai filter) ======================== */
+function openRepAll(field, ids, what) {
+  if (!ids || !ids.length) return toast('Tidak ada data payroll.', 'err');
+  state.raIds = ids;
+  $('#raTitle').textContent = field === 'kesBase' ? 'Edit Semua Gaji BPJS' : 'Edit Semua Gaji Pajak';
+  $('#raTarget').textContent = `${ids.length} karyawan ${what || ''} · ${periodLabel(state.period)}`;
+  $('#raField').value = field; $('#raField').closest('.field').hidden = true;
+  $$('#raMode input')[0].checked = true; $('#raVal').value = ''; syncRaMode();
+  openModal('mRepAll');
+}
+function syncRaMode() { const v = ($('#raMode input:checked') || {}).value; $('#raValWrap').hidden = v !== 'value'; $('#raVal').required = v === 'value'; }
+$('#raMode').addEventListener('change', syncRaMode);
+$('#repAllForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const ids = state.raIds, mode = $('#raMode input:checked').value, field = $('#raField').value;
+  const label = { value: 'nominal ' + rp($('#raVal').value), thp: 'Gaji Real', gp: 'Gaji Pokok', bruto: 'Penghasilan Bruto', auto: 'nilai otomatis' }[mode];
+  if (!confirm(`Terapkan ${label} ke ${ids.length} karyawan?`)) return;
+  const r = await safe(() => api('setReportBase', { period: state.period, ids, field, mode, value: $('#raVal').value }));
+  if (r) { closeModal('mRepAll'); toast(`${r.count} karyawan diperbarui.`, 'ok'); refresh(); }
+});
+
+/* ============================ SET PTKP SEKALIGUS ============================ */
+$('#ptVal').innerHTML = '<option value="">-- pilih --</option>' + PTKP_LIST.map(p => `<option>${p}</option>`).join('');
+function openPtkp(k) {
+  const rows = subRows(k), ids = [...new Set(rows.map(r => r.empId))];
+  if (!ids.length) return toast('Tidak ada karyawan.', 'err');
+  state.ptIds = ids; $('#ptVal').value = '';
+  $('#ptTarget').textContent = `${ids.length} karyawan sesuai filter saat ini`;
+  openModal('mPtkp');
+}
+$('#ptkpForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!confirm(`Set Status PTKP ${$('#ptVal').value} untuk ${state.ptIds.length} karyawan?`)) return;
+  const r = await safe(() => api('setPtkp', { empIds: state.ptIds, ptkp: $('#ptVal').value }));
+  if (r) { closeModal('mPtkp'); toast(`PTKP ${r.count} karyawan diperbarui.`, 'ok'); refresh(); }
+});
+
+/* ===================== FREEZE HEADER (2 baris header) ===================== */
+function fixHeads() {
+  requestAnimationFrame(() => $$('.table-wrap.fz table').forEach(t => {
+    const rows = t.tHead ? t.tHead.rows : [];
+    if (rows.length > 1) { const h = rows[0].getBoundingClientRect().height; if (h) Array.from(rows[1].cells).forEach(c => c.style.top = h + 'px'); }
+  }));
+}
+window.addEventListener('resize', fixHeads);
+
+/* ======================= PINDAH PERIODE PAYROLL ========================== */
+function openMove() {
+  if (!state.payroll.length) return toast('Periode ini tidak berisi data payroll.', 'err');
+  $('#mvFrom').value = periodLabel(state.period); $('#mvTo').value = prevPeriodOf(state.period); $('#mvCount').textContent = state.payroll.length;
+  openModal('mMove');
+}
+$('#moveForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const to = $('#mvTo').value;
+  if (!/^\d{4}-\d{2}$/.test(to)) return toast('Pilih periode tujuan.', 'err');
+  if (to === state.period) return toast('Periode tujuan tidak boleh sama.', 'err');
+  if (!confirm(`Pindahkan ${state.payroll.length} baris payroll dari ${periodLabel(state.period)} ke ${periodLabel(to)}?`)) return;
+  const r = await safe(() => api('movePeriod', { from: state.period, to })); if (!r) return;
+  closeModal('mMove'); toast(`${r.count} baris dipindahkan ke ${periodLabel(to)}. Periode ${periodLabel(state.period)} sekarang kosong.`, 'ok');
+  refresh();
+});
+
+/* ========================= SALDO KASBON (Kasbon) ========================= */
+$('#ksQ').addEventListener('input', renderKasSaldo);
+function renderKasSaldo() {
+  const q = $('#ksQ').value.trim().toLowerCase();
+  const rows = state.kasbonSaldo.filter(r => !q || [r.name, r.empId].some(v => String(v || '').toLowerCase().includes(q)));
+  $('#ksBody').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td>
+    <td class="sticky-col" style="min-width:190px"><span class="cell-main">${esc(r.name)}</span><div class="small mono">${esc(r.empId)}${r.hasPay ? '' : ' &middot; belum ada payroll'}</div></td><td class="nowrap">${esc(r.jobSite) || '-'}</td>
+    <td class="num bl">${nf(r.kasLalu)}</td><td class="num">${nf(r.potKas)}</td><td class="num">${nf(r.sisaKas)}</td>
+    <td class="num bl">${nf(r.cair)}</td><td class="num bl tot-in">${nf(r.saldo)}</td></tr>`).join('')
+    : emptyRow(8, state.kasbonSaldo.length ? 'Tidak ada yang cocok.' : 'Tidak ada saldo kasbon pada periode ini.', 'coins');
+  $('#ksFoot').innerHTML = rows.length ? `<tr><td></td><td class="sticky-col">TOTAL (${rows.length} karyawan)</td><td></td>${['kasLalu','potKas','sisaKas'].map((k, i) => `<td class="num${i ? '' : ' bl'}">${nf(rsum(rows, k))}</td>`).join('')}
+    <td class="num bl">${nf(rsum(rows, 'cair'))}</td><td class="num bl tot-in">${nf(rsum(rows, 'saldo'))}</td></tr>` : '';
+}
+
+/* ======================== HALAMAN GAJI BPJS & GAJI PAJAK ===================== */
+const pctTxt = v => v == null ? '-' : String(v).replace('.', ',') + '%';
+const SUB = {
+  rptKes: { title: 'Gaji BPJS', pdf: 'LAPORAN GAJI BPJS', icon: 'shield', field: 'kesBase', mode: 'kes', file: 'Gaji_BPJS',
+    rule: 'openBpjsSet()', note: () => { const S = state.settings, c = v => +v ? 'plafon ' + nf(v) : 'tanpa plafon';
+      return `Gaji BPJS otomatis = MAX(Gaji Pokok, UMK ${nf(S.RB_UMK)}). Kesehatan ${pct(S.RB_KES_EE)} + ${pct(S.RB_KES_ER)} (${c(S.RB_KES_CAP)}), JHT ${pct(S.RB_JHT_EE)} + ${pct(S.RB_JHT_ER)}, JP ${pct(S.RB_JP_EE)} + ${pct(S.RB_JP_ER)} (${c(S.RB_JP_CAP)}), JKK ${pct(S.RB_JKK_ER)}, JKM ${pct(S.RB_JKM_ER)}. Tidak mengubah Gaji Real.`; },
+    stats: [['Total Gaji BPJS', 'kesSetor', 'hero', 'shield'], ['Total Iuran Pekerja', 'bEe', '', 'users'], ['Total Iuran Pemberi Kerja', 'bEr', '', 'brief']],
+    cols: [{ h: 'Gaji Pokok', k: 'gp', bl: 1 }, { h: 'Gaji BPJS', k: 'kesSetor', cls: 'tot-in', bl: 1, main: 1, flag: 'kesManual' },
+      { g: 'Kesehatan', h: 'Pekerja', k: 'bKesEe', bl: 1 }, { g: 'Kesehatan', h: 'Perusahaan', k: 'bKesEr' },
+      { g: 'JHT', h: 'Pekerja', k: 'bJhtEe', bl: 1 }, { g: 'JHT', h: 'Perusahaan', k: 'bJhtEr' },
+      { g: 'JP', h: 'Pekerja', k: 'bJpEe', bl: 1 }, { g: 'JP', h: 'Perusahaan', k: 'bJpEr' },
+      { g: 'JKK & JKM', h: 'JKK', k: 'bJkk', bl: 1 }, { g: 'JKK & JKM', h: 'JKM', k: 'bJkm' },
+      { g: 'Total Iuran', h: 'Pekerja', k: 'bEe', bl: 1 }, { g: 'Total Iuran', h: 'Perusahaan', k: 'bEr' }, { g: 'Total Iuran', h: 'Total', k: 'bTotal', cls: 'net' }] },
+  rptTax: { title: 'Gaji Pajak', pdf: 'LAPORAN GAJI PAJAK (DASAR PPh 21)', icon: 'receipt', field: 'taxBaseOv', mode: 'tax', file: 'Gaji_Pajak', ptkp: true,
+    rule: 'openTaxRule()', note: () => { const L = { gp: 'Gaji Pokok', tl: 'Tunjangan', thr: 'THR', jkk: 'JKK', jkm: 'JKM', kes: 'BPJS Kes perusahaan' };
+      return `Gaji Pajak otomatis = ${String(state.settings.RT_COMP || '').split(',').filter(Boolean).map(c => L[c]).join(' + ')}. PPh 21 = tarif TER (PP 58/2023) sesuai Status PTKP x Gaji Pajak (estimasi). Tidak mengubah Gaji Real.`; },
+    stats: [['Total Gaji Pajak', 'taxSetor', 'hero', 'receipt'], ['Total Penghasilan Bruto', 'bruto', '', 'trend'], ['Estimasi PPh 21 (TER)', 'rptPph', '', 'file']],
+    cols: [{ h: 'PTKP', f: r => r.ptkp || '-', ctr: 1, badge: 1 }, { h: 'Kategori', f: r => r.terCat ? 'TER ' + r.terCat : '-', ctr: 1 },
+      { g: 'Komponen', h: 'Gaji Pokok', k: 'gp', bl: 1 }, { g: 'Komponen', h: 'Tunjangan', k: 'tl' }, { g: 'Komponen', h: 'THR', k: 'thr' },
+      { g: 'Komponen', h: 'JKK', k: 'bJkk' }, { g: 'Komponen', h: 'JKM', k: 'bJkm' }, { g: 'Komponen', h: 'BPJS Kes Prsh', k: 'bKesEr' },
+      { h: 'Otomatis', k: 'taxAuto', bl: 1 }, { h: 'Gaji Pajak', k: 'taxSetor', cls: 'tot-in', bl: 1, main: 1, flag: 'taxManual' },
+      { h: 'Tarif TER', f: r => pctTxt(r.rptTerRate), num: 1, bl: 1 }, { h: 'PPh 21', k: 'rptPph', cls: 'net' }] }
+};
+function buildSubPages() {
+  $('#subRptHost').outerHTML = Object.keys(SUB).map(k => { const c = SUB[k]; return `
+  <section id="tab-${k}" class="page" hidden>
+    <div class="stats s3" id="${k}Stats"></div>
+    <div class="card" style="margin-top:18px">
+      <div class="card-head bordered">
+        <h3><span class="hi hi-blue">${ic(c.icon)}</span>${c.title} <span class="sub" style="font-weight:500">(<span class="subPer"></span>)</span></h3><span class="sub" id="${k}Count"></span>
+        <div class="sp">
+          <button class="btn btn-ghost" onclick="${c.rule}">${ic('gear')}Aturan ${c.title}</button>
+          <button class="btn btn-ghost" onclick="openRptImport('${k}')">${ic('upload')}Import</button>
+          <button class="btn btn-ghost" onclick="exportSubCsv('${k}')">${ic('sheet')}CSV</button>
+          <button class="btn btn-ghost" onclick="exportSubPdf('${k}')">${ic('file')}PDF</button>
+          ${c.ptkp ? `<button class="btn btn-ghost" onclick="openPtkp('${k}')">${ic('users')}Set PTKP</button>` : ''}
+          <button class="btn btn-primary" onclick="subEditAll('${k}')">${ic('edit')}Edit Semua</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding-bottom:0"><div class="callout">${ic('info', 'ic')}<div id="${k}Note"></div></div></div>
+      <div class="toolbar ${c.ptkp ? 't4' : 't3'}" style="padding-top:16px">
+        <div class="search">${ic('search')}<input id="${k}Q" placeholder="Cari nama atau ID..."></div>
+        <select id="${k}Site"></select>
+        ${c.ptkp ? `<select id="${k}Ptkp"><option value="">Semua Status PTKP</option><option value="-">PTKP belum diisi</option>${PTKP_LIST.map(p => `<option>${p}</option>`).join('')}</select>` : ''}
+      </div>
+      <div class="table-wrap fz"><table class="pay-table"><thead id="${k}Head"></thead><tbody id="${k}Body"></tbody><tfoot id="${k}Foot"></tfoot></table></div>
+    </div>
+  </section>`; }).join('');
+  Object.keys(SUB).forEach(k => { $('#' + k + 'Q').addEventListener('input', () => renderSub(k)); $('#' + k + 'Site').addEventListener('change', () => renderSub(k));
+    if (SUB[k].ptkp) $('#' + k + 'Ptkp').addEventListener('change', () => renderSub(k)); });
+}
+buildSubPages();
+function subRows(k) {
+  const q = $('#' + k + 'Q').value.trim().toLowerCase(), site = $('#' + k + 'Site').value, pt = SUB[k].ptkp ? $('#' + k + 'Ptkp').value : '';
+  return state.payroll.filter(r => (!site || r.jobSite === site) && (!pt || (pt === '-' ? !r.ptkp : r.ptkp === pt)) &&
+      (!q || [r.name, r.empId].some(v => String(v || '').toLowerCase().includes(q))))
+    .slice().sort((a, b) => (a.jobSite || '').localeCompare(b.jobSite || '') || a.name.localeCompare(b.name));
+}
+function renderSub(k) {
+  const c = SUB[k]; siteFilterOpts('#' + k + 'Site', state.payroll);
+  const rows = subRows(k);
+  $('#' + k + 'Note').textContent = c.note();
+  $('#' + k + 'Count').textContent = state.payroll.length ? `${rows.length} dari ${state.payroll.length} karyawan` : '';
+  const stat = ([lbl, key, cls, icon]) => `<div class="stat ${cls}"><div class="stat-top"><span class="lbl">${lbl}</span><span class="chip ${cls ? '' : 'hi-blue'}">${ic(icon)}</span></div><div class="val num">${rp(rsum(rows, key))}</div><div class="foot">${rows.length} karyawan${key === 'rptPph' ? ` &middot; ${rows.filter(r => !r.ptkp).length} tanpa PTKP` : ''}${key === 'kesSetor' || key === 'taxSetor' ? ` &middot; ${rows.filter(r => r[key === 'kesSetor' ? 'kesManual' : 'taxManual']).length} manual` : ''}</div></div>`;
+  $('#' + k + 'Stats').innerHTML = c.stats.map(stat).join('');
+  // Header: kolom dengan grup (g) dibuat 2 baris
+  const hasG = c.cols.some(x => x.g), rs = hasG ? ' rowspan="2"' : '';
+  const thCls = x => `${x.k || x.num ? 'num' : x.ctr ? 'ctr' : 'l'}${x.bl ? ' bl' : ''}${x.main ? ' g-tot' : ''}`;
+  let r1 = `<th class="l"${rs} style="width:50px">No.</th><th class="l sticky-col"${rs}>Karyawan</th><th class="l"${rs}>Job Site</th>`, r2 = '';
+  for (let i = 0; i < c.cols.length; i++) {
+    const x = c.cols[i];
+    if (!x.g) { r1 += `<th class="${thCls(x)}"${rs}>${x.h}</th>`; continue; }
+    let n = 1; while (c.cols[i + n] && c.cols[i + n].g === x.g) n++;
+    r1 += `<th class="grp g-in bl" colspan="${n}">${x.g}</th>`;
+    for (let j = 0; j < n; j++) r2 += `<th class="g-in num${j === 0 ? ' bl' : ''}">${c.cols[i + j].h}</th>`;
+    i += n - 1;
+  }
+  r1 += `<th class="bl"${rs}></th>`;
+  $('#' + k + 'Head').innerHTML = `<tr>${r1}</tr>` + (hasG ? `<tr>${r2}</tr>` : '');
+  const td = (col, r) => col.k
+    ? `<td class="num${col.bl ? ' bl' : ''}${col.cls ? ' ' + col.cls : ''}">${r[col.k] == null ? '<span class="muted">-</span>' : nf(r[col.k])}${col.flag && r[col.flag] ? ' <span class="badge b-manual">MANUAL</span>' : ''}</td>`
+    : `<td class="${col.num ? 'num' : col.ctr ? 'ctr' : ''}${col.bl ? ' bl' : ''}">${col.badge ? (r.ptkp ? `<span class="badge b-ptkp">${esc(r.ptkp)}</span>` : '<span class="badge b-na">belum diisi</span>') : esc(col.f(r))}</td>`;
+  $('#' + k + 'Body').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td>
+    <td class="sticky-col" style="min-width:190px"><span class="cell-main">${esc(r.name)}</span>${r.status === 'DRAFT' ? ' <span class="badge b-draft">DRAFT</span>' : ''}<div class="small mono">${esc(r.empId)}</div></td>
+    <td class="nowrap">${esc(r.jobSite) || '-'}</td>${c.cols.map(col => td(col, r)).join('')}<td class="acts bl"><button class="btn btn-ghost btn-sm" onclick="openRep('${esc(r.id)}','${c.mode}')">${ic('edit')}Edit</button></td></tr>`).join('')
+    : emptyRow(c.cols.length + 4, state.payroll.length ? 'Tidak ada data yang cocok dengan filter.' : 'Belum ada payroll pada periode ini.', c.icon);
+  $('#' + k + 'Foot').innerHTML = rows.length ? `<tr><td></td><td class="sticky-col">TOTAL (${rows.length})</td><td></td>${c.cols.map(col => col.k
+    ? `<td class="num${col.bl ? ' bl' : ''}${col.cls ? ' ' + col.cls : ''}">${nf(rsum(rows, col.k))}</td>` : `<td class="${col.bl ? 'bl' : ''}"></td>`).join('')}<td class="bl"></td></tr>` : '';
+}
+function subEditAll(k) { const c = SUB[k]; openRepAll(c.field, subRows(k).map(r => r.id), 'sesuai filter saat ini'); }
+function subTitleSuffix(k) { const s = $('#' + k + 'Site').value; return s ? '_' + s.replace(/\s+/g, '_') : ''; }
+const colLabel = x => (x.g ? x.g + ' ' : '') + x.h;
+function exportSubCsv(k) {
+  const rows = subRows(k), c = SUB[k]; if (!rows.length) return toast('Belum ada data untuk diekspor.', 'err');
+  const head = ['No', 'ID Karyawan', 'Nama', 'Job Site', ...c.cols.map(colLabel), ...c.cols.filter(x => x.flag).map(x => 'Ket. ' + x.h), 'Status Data'];
+  const body = rows.map((r, i) => [i + 1, r.empId, r.name, r.jobSite, ...c.cols.map(x => x.k ? (r[x.k] == null ? '' : r[x.k]) : x.f(r)), ...c.cols.filter(x => x.flag).map(x => r[x.flag] ? 'Manual' : 'Otomatis'), r.status]);
+  body.push(['', '', 'TOTAL', '', ...c.cols.map(x => x.k ? rsum(rows, x.k) : ''), ...c.cols.filter(x => x.flag).map(() => ''), '']);
+  downloadFile(`Laporan_${c.file}_PJM_${state.period}${subTitleSuffix(k)}.csv`, toCSV([head, ...body], $('#csvDelim').value || ';'), 'text/csv');
+  toast('CSV laporan diunduh.', 'ok');
+}
+/* PDF tabel generik (A4 landscape): dipakai Gaji BPJS, Gaji Pajak, dan Payroll (Gaji Real) */
+function pdfTable({ title, sub, stats, cols, rows, note, file }) {
+  const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' }), W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  pdfHeader(doc, title, sub);
+  const bw = (W - 28 - 2 * 5) / 3;
+  stats.forEach(([lbl, val], i) => { const x = 14 + i * (bw + 5); doc.setFillColor(...(i === 0 ? NAVY : i === 1 ? BLUE : GREEN)); doc.roundedRect(x, 37, bw, 18, 2.5, 2.5, 'F');
+    doc.setTextColor(255); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.text(lbl.toUpperCase(), x + 4.5, 43); doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.text(rp(val), x + 4.5, 50.5); });
+  doc.setTextColor(15, 23, 42);
+  const colStyles = { 0: { cellWidth: 8, halign: 'center' } };
+  cols.forEach((x, i) => { if (x.k || x.num) colStyles[i + 3] = { halign: 'right' }; else if (x.ctr) colStyles[i + 3] = { halign: 'center' }; });
+  doc.autoTable({
+    startY: 60, margin: { left: 10, right: 10, top: 38 }, theme: 'grid', styles: { fontSize: cols.length > 11 ? 6.4 : 7.4, cellPadding: 1.3, overflow: 'linebreak' },
+    headStyles: { fillColor: NAVY, textColor: 255, halign: 'center', valign: 'middle', fontSize: cols.length > 11 ? 6.2 : 7.2 },
+    head: [['No', 'Nama Karyawan', 'Job Site', ...cols.map(colLabel)]],
+    body: rows.map((r, i) => [String(i + 1), r.name + ' (' + r.empId + ')' + (r.status === 'DRAFT' ? ' - draft' : ''), r.jobSite || '-',
+      ...cols.map(x => x.k ? (r[x.k] == null ? '-' : nf(r[x.k]) + (x.flag && r[x.flag] ? ' *' : '')) : String(x.f(r)))]),
+    foot: [['', 'TOTAL (' + rows.length + ' karyawan)', '', ...cols.map(x => x.k ? nf(rsum(rows, x.k)) : '')]],
+    footStyles: { fillColor: [209, 250, 229], textColor: [6, 95, 70], fontStyle: 'bold', halign: 'right' },
+    columnStyles: colStyles,
+    didDrawPage: d => { if (d.pageNumber > 1) pdfHeader(doc, title, sub); }
+  });
+  let y = doc.lastAutoTable.finalY + 6;
+  if (y > H - 46) { doc.addPage(); pdfHeader(doc, title, sub); y = 40; }
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(71, 85, 105); doc.text(note, 14, y, { maxWidth: W - 28 });
+  y += 12; doc.setTextColor(15, 23, 42); doc.setFontSize(9);
+  [['Disiapkan oleh', W * 0.15], ['Diperiksa oleh', W * 0.5], ['Disetujui oleh', W * 0.85]].forEach(([t, x]) => { doc.text(t, x, y, { align: 'center' }); doc.line(x - 26, y + 20, x + 26, y + 20); });
+  pdfFooters(doc);
+  doc.save(file);
+}
+function exportSubPdf(k) {
+  const rows = subRows(k), c = SUB[k]; if (!rows.length) return toast('Belum ada data untuk diekspor.', 'err');
+  const site = $('#' + k + 'Site').value;
+  pdfTable({ title: c.pdf, sub: 'Periode ' + periodLabel(state.period) + (site ? ' - ' + site : ''), stats: c.stats.map(s => [s[0], rsum(rows, s[1])]),
+    cols: c.cols, rows, note: c.note() + ' Tanda * = nilai diedit manual.', file: `Laporan_${c.file}_PJM_${state.period}${subTitleSuffix(k)}.pdf` });
+}
+
+/* ============================ ATURAN GAJI PAJAK ============================ */
+function openTaxRule() {
+  const on = String(state.settings.RT_COMP || '').split(',');
+  $$('#tcList input').forEach(i => i.checked = on.includes(i.value));
+  openModal('mTaxRule');
+}
+$('#taxRuleForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const comps = $$('#tcList input:checked').map(i => i.value);
+  if (!comps.length) return toast('Pilih minimal satu komponen.', 'err');
+  const r = await safe(() => api('saveSettings', { RT_COMP: comps.join(',') }));
+  if (r) { closeModal('mTaxRule'); toast('Aturan Gaji Pajak tersimpan.', 'ok'); refresh(); }
+});
+
+/* ===================== IMPORT GAJI BPJS / GAJI PAJAK ======================= */
+function openRptImport(k) {
+  if (!state.payroll.length) return toast('Belum ada payroll pada periode ini.', 'err');
+  state.riMode = k;
+  $('#riTitle').textContent = 'Import ' + SUB[k].title;
+  $('#riHint').innerHTML = k === 'rptKes'
+    ? 'Kolom yang dibaca: <b>ID Karyawan</b> dan <b>Gaji BPJS</b>. Sel <b>kosong</b> = tidak diubah, tulis <b>otomatis</b> = kembali ke hitungan sistem. Kolom "(info)" hanya acuan.'
+    : 'Kolom yang dibaca: <b>ID Karyawan</b>, <b>Gaji Pajak</b>, dan <b>Status PTKP</b> (opsional, memperbarui Master Karyawan). Sel <b>kosong</b> = tidak diubah, tulis <b>otomatis</b> = kembali ke hitungan sistem.';
+  $('#riPeriod').textContent = periodLabel(state.period); $('#riFile').value = ''; $('#riUrl').value = ''; $('#riResult').innerHTML = ''; state.riRows = null;
+  openModal('mRptImp');
+}
+function downloadRptTemplate() {
+  const k = state.riMode, rows = state.payroll.slice().sort((a, b) => (a.jobSite || '').localeCompare(b.jobSite || '') || a.name.localeCompare(b.name));
+  const tpl = k === 'rptKes'
+    ? [['ID Karyawan', 'Nama', 'Job Site', 'Gaji Pokok (info)', 'Gaji BPJS', 'Gaji BPJS Otomatis (info)'], r => [r.empId, r.name, r.jobSite, r.gp, r.kesManual ? r.kesSetor : '', r.kesAuto]]
+    : [['ID Karyawan', 'Nama', 'Job Site', 'Status PTKP', 'Gaji Pajak', 'Gaji Pajak Otomatis (info)'], r => [r.empId, r.name, r.jobSite, r.ptkp, r.taxManual ? r.taxSetor : '', r.taxAuto]];
+  downloadFile(`Template_Import_${SUB[k].file}_PJM_${state.period}.csv`, toCSV([tpl[0], ...rows.map(tpl[1])], $('#csvDelim').value || ';'), 'text/csv');
+  toast('Template diunduh. Kolom yang kosong berarti masih otomatis.', 'ok');
+}
+$('#riFile').addEventListener('change', async e => { const f = e.target.files[0]; state.riRows = f ? parseCSV(await readText(f)) : null; });
+async function runRptImport() {
+  const url = $('#riUrl').value.trim();
+  if (!state.riRows && !url) return toast('Pilih file CSV atau isi URL Google Sheets.', 'err');
+  if (state.riRows && !state.riRows.length) return toast('File kosong atau format tidak dikenali.', 'err');
+  // Hanya kolom milik menu ini yang dikirim, supaya import Gaji BPJS tidak mengubah Gaji Pajak (dan sebaliknya).
+  const keep = state.riMode === 'rptKes' ? /^(id|idkaryawan|empid|gajibpjs|gajisetorbpjs.*|gajibpjskes.*)$/ : /^(id|idkaryawan|empid|gajipajak|gajisetorpajak|statusptkp|ptkp)$/;
+  const norm = h => String(h).replace(/\(.*?\)/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const rows = state.riRows ? state.riRows.map(o => { const n = {}; Object.keys(o).forEach(h => { if (keep.test(norm(h))) n[h] = o[h]; }); return n; }) : null;
+  const r = await safe(() => api('importReportBase', rows ? { period: state.period, rows, only: state.riMode } : { period: state.period, url, only: state.riMode })); if (!r) return;
+  $('#riResult').innerHTML = `<div class="resultbox ok"><b>${r.updated} karyawan diperbarui.</b>` +
+    (r.errors.length ? `<ul>${r.errors.map(x => `<li class="c-red">Baris ${x.line}: ${esc(x.msg)}</li>`).join('')}</ul>` : '') + '</div>';
+  refresh();
+}
+
+/* ======================= EXPORT PAYROLL (GAJI REAL) ======================== */
+const PAY_COLS = [{ h: 'Gaji Pokok', k: 'gp', g: 'PENGHASILAN BRUTO (KOTOR)' }, { h: 'Tun. Lapangan', k: 'tl', g: 'PENGHASILAN BRUTO (KOTOR)' }, { h: 'THR', k: 'thr', g: 'PENGHASILAN BRUTO (KOTOR)' },
+  { h: 'Jumlah Penghasilan', k: 'bruto' }, { h: 'Sisa Ksbn Bulan Lalu', k: 'kasLalu', g: 'PERHITUNGAN KASBON' }, { h: 'Sisa Ksbn Bulan Ini', k: 'sisaKas', g: 'PERHITUNGAN KASBON' },
+  { h: 'Pot. Kasbon', k: 'potKas', g: 'PENGURANG PERHITUNGAN PENGHASILAN' }, { h: 'JHT', k: 'jht', g: 'PENGURANG PERHITUNGAN PENGHASILAN' }, { h: 'JP', k: 'jp', g: 'PENGURANG PERHITUNGAN PENGHASILAN' },
+  { h: 'BPJS Kes.', k: 'kes', g: 'PENGURANG PERHITUNGAN PENGHASILAN' }, { h: 'Jumlah Pengurang', k: 'totalPeng' }, { h: 'Penghasilan Bersih/Gaji Bersih', k: 'thp' }];
+function payRows() {
+  const q = $('#payQ').value.trim().toLowerCase(), site = $('#paySite').value, st = $('#payStatus').value;
+  return state.payroll.filter(r => (!site || r.jobSite === site) && (!st || (r.status || 'FINAL') === st) && (!q || [r.name, r.empId, r.bank, r.accNo].some(v => String(v || '').toLowerCase().includes(q))));
+}
+function xlsxReady() { if (window.XLSX) return true; toast('Library Excel belum termuat. Periksa koneksi internet lalu muat ulang halaman.', 'err'); return false; }
+/** Buat sheet dari array-of-arrays, set lebar kolom & format angka ribuan, akun bank sebagai teks. */
+function aoaSheet(aoa, widths, moneyFrom, merges) {
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = widths.map(w => ({ wch: w }));
+  if (merges) ws['!merges'] = merges;
+  const ref = XLSX.utils.decode_range(ws['!ref']);
+  for (let R = ref.s.r; R <= ref.e.r; R++) for (let C = moneyFrom; C <= ref.e.c; C++) {
+    const cell = ws[XLSX.utils.encode_cell({ r: R, c: C })]; if (cell && cell.t === 'n') cell.z = '#,##0';
+  }
+  return ws;
+}
+function exportPayXlsx() {
+  if (!xlsxReady()) return;
+  const rows = payRows(); if (!rows.length) return toast('Belum ada data payroll untuk diekspor.', 'err');
+  const S = state.settings, title = [[(S.COMPANY_NAME || 'PT. Prohaba Jaya Mandiri') + ' - DAFTAR GAJI (GAJI REAL)'], ['Periode ' + periodLabel(state.period)], []];
+  const h1 = ['No', 'ID Karyawan', 'Nama', 'Job Site', 'Bank', 'No Rekening'], h2 = ['', '', '', '', '', ''], merges = [];
+  const off = title.length, base = h1.length;
+  h1.forEach((_, c) => merges.push({ s: { r: off, c }, e: { r: off + 1, c } }));
+  for (let i = 0; i < PAY_COLS.length; i++) {
+    const x = PAY_COLS[i], c = base + i;
+    if (!x.g) { h1.push(x.h); h2.push(''); merges.push({ s: { r: off, c }, e: { r: off + 1, c } }); continue; }
+    let n = 1; while (PAY_COLS[i + n] && PAY_COLS[i + n].g === x.g) n++;
+    for (let j = 0; j < n; j++) { h1.push(j ? '' : x.g); h2.push(PAY_COLS[i + j].h); }
+    merges.push({ s: { r: off, c }, e: { r: off, c: c + n - 1 } }); i += n - 1;
+  }
+  const body = rows.map((r, i) => [i + 1, r.empId, r.name, r.jobSite || '', r.bank || '', String(r.accNo || ''), ...PAY_COLS.map(x => +r[x.k] || 0)]);
+  const tot = ['', '', 'TOTAL', '', '', '', ...PAY_COLS.map(x => rsum(rows, x.k))];
+  const ws = aoaSheet([...title, h1, h2, ...body, tot], [5, 11, 28, 16, 10, 18, ...PAY_COLS.map(() => 15)], base, merges);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Gaji Real');
+  XLSX.writeFile(wb, `Payroll_Gaji_Real_PJM_${state.period}.xlsx`);
+  toast('Excel payroll diunduh.', 'ok');
+}
+function exportPayPdf() {
+  const rows = payRows(); if (!rows.length) return toast('Belum ada data payroll untuk diekspor.', 'err');
+  const cols = PAY_COLS.map(x => Object.assign({}, x, { g: '' }));
+  pdfTable({ title: 'DAFTAR GAJI (GAJI REAL)', sub: 'Periode ' + periodLabel(state.period), cols, rows,
+    stats: [['Total Gaji Real (Bersih)', rsum(rows, 'thp')], ['Total Penghasilan Bruto', rsum(rows, 'bruto')], ['Total Pengurang', rsum(rows, 'totalPeng')]],
+    note: 'Gaji Real = Penghasilan Bruto - (Potongan Kasbon + BPJS JHT + JP + Kesehatan pekerja; potongan BPJS diinput manual). Nominal yang ditransfer ke karyawan.', file: `Payroll_Gaji_Real_PJM_${state.period}.pdf` });
+}
+
+/* ======================= EXPORT EXCEL BATCH TRANSFER ======================== */
+function exportBatchXlsx(bankFilter) {
+  if (!xlsxReady()) return;
+  const list = state.batches.filter(b => !bankFilter || b.bank === bankFilter);
+  if (!list.length) return toast('Belum ada data transfer.', 'err');
+  const S = state.settings, wb = XLSX.utils.book_new(), per = 'Periode ' + periodLabel(state.period);
+  if (!bankFilter) {
+    const aoa = [[(S.COMPANY_NAME || 'PT. Prohaba Jaya Mandiri') + ' - RINGKASAN BATCH TRANSFER'], [per + ' · Limit per batch ' + rp(S.BATCH_LIMIT)], [],
+      ['Bank Penerima', 'Jumlah Transfer', 'Jumlah Batch', 'Total Nominal'], ...list.map(b => [b.bank, b.count, b.batches.length, b.total]),
+      ['TOTAL', rsum(list, 'count'), list.reduce((a, b) => a + b.batches.length, 0), rsum(list, 'total')]];
+    XLSX.utils.book_append_sheet(wb, aoaSheet(aoa, [24, 16, 14, 20], 3), 'Ringkasan');
+  }
+  const used = {};
+  list.forEach(bk => {
+    const aoa = [[`BATCH TRANSFER ${bk.bank}`], [per + ` · ${bk.count} transfer · ${bk.batches.length} batch · Total ${rp(bk.total)}`], []];
+    bk.batches.forEach(b => {
+      aoa.push([`Batch ${b.no} dari ${bk.batches.length}`]);
+      aoa.push(['No', 'Nama Penerima', 'No Rekening', 'Bank', 'Job Site', 'Nominal']);
+      b.items.forEach((it, i) => aoa.push([i + 1, it.name, String(it.accNo || ''), bk.bank, it.jobSite || '', it.amount]));
+      aoa.push(['', 'TOTAL BATCH ' + b.no, '', '', '', b.total], []);
+    });
+    let name = bk.bank.replace(/[\[\]:*?\/\\]/g, ' ').slice(0, 28) || 'Bank'; while (used[name]) name += '_'; used[name] = 1;
+    XLSX.utils.book_append_sheet(wb, aoaSheet(aoa, [6, 32, 22, 12, 18, 18], 5), name);
+  });
+  XLSX.writeFile(wb, `Batch_Transfer_${(bankFilter || 'SEMUA_BANK').replace(/\s+/g, '_')}_PJM_${state.period}.xlsx`);
+  toast('Excel batch transfer diunduh.', 'ok');
+}
+
+/* ============================ BULK PAYROLL ========================== */
+function openBulk() {
+  $('#bulkPeriod').textContent = periodLabel(state.period);
+  $('#bulkResult').innerHTML = ''; $('#bulkFile').value = ''; $('#bulkUrl').value = ''; $('#bulkInfo').textContent = ''; state.bulkRows = null;
+  openModal('mBulk');
+}
+async function downloadPayTemplate() {
+  const list = await safe(() => api('bulkTemplate', { period: state.period })); if (!list) return;
+  if (!list.length) return toast('Tidak ada karyawan aktif di Master Data.', 'err');
+  const head = ['ID Karyawan','Nama Lengkap','Departemen','Job Site','Bank','Gaji Pokok','Tunjangan Lapangan','THR','Sisa Kasbon Bulan Lalu','Potongan Kasbon','BPJS JHT','BPJS JP','BPJS Kesehatan'];
+  const body = list.map(e => [e.empId, e.name, e.dept, e.jobSite, e.bank, '', '', '', e.kasLalu || 0, '', e.jht || 0, e.jp || 0, e.kes || 0]);
+  downloadFile(`Template_Payroll_PJM_${state.period}.csv`, toCSV([head, ...body], $('#csvDelim').value || ';'), 'text/csv');
+  toast(`Template berisi ${list.length} karyawan aktif diunduh.`, 'ok');
+}
+$('#bulkFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; state.bulkRows = null; if (!f) return;
+  const rows = parseCSV(await readText(f)); state.bulkRows = rows;
+  $('#bulkInfo').textContent = rows.length ? `${rows.length} baris terbaca dari ${f.name}.` : 'File kosong / format tidak dikenali.';
+});
+async function runBulk() {
+  const url = $('#bulkUrl').value.trim();
+  if (!state.bulkRows && !url) return toast('Pilih file CSV atau isi URL Google Sheets.', 'err');
+  const payload = url && !state.bulkRows ? { period: state.period, url } : { period: state.period, rows: state.bulkRows };
+  const r = await safe(() => api('bulkUpload', payload)); if (!r) return;
+  $('#bulkResult').innerHTML = `<div class="resultbox ok"><b>${r.processed} baris dihitung otomatis</b> (Bruto, BPJS, Kasbon, Pengurang, Take Home Pay)` +
+    `${r.replaced ? ` &middot; ${r.replaced} baris lama diganti` : ''}${r.skipped ? ` &middot; ${r.skipped} baris kosong dilewati` : ''}.` +
+    (r.errors.length ? `<ul>${r.errors.map(x => `<li class="c-red">Baris ${x.line}: ${esc(x.msg)}</li>`).join('')}</ul>` : '') + '</div>';
+  refresh();
+}
+
+/* =============================== KASBON ============================= */
+function renderKasbon() {
+  const P = state.period;
+  const cair = state.kasbon.filter(k => k.status === 'Cair' && k.period === P).sort((a, b) => (a.cairDate || '').localeCompare(b.cairDate || '') || a.name.localeCompare(b.name));
+  const pend = state.kasbon.filter(k => k.status !== 'Cair').sort((a, b) => (a.reqDate || '').localeCompare(b.reqDate || '') || a.name.localeCompare(b.name));
+  const sum = a => a.reduce((s, r) => s + (+r.amount || 0), 0);
+  const name = k => `<span class="cell-main">${esc(k.name)}</span><div class="small mono">${esc(k.empId)}</div>`;
+  $('#kasCairBody').innerHTML = cair.length ? cair.map((k, i) => `<tr><td>${i + 1}</td><td>${name(k)}</td><td class="nowrap">${fmtDate(k.cairDate)}</td><td>${esc(k.note) || '<span class="muted">-</span>'}</td>
+    <td class="num c-green">${nf(k.amount)}</td><td class="acts"><button class="btn btn-ghost btn-sm" onclick="openKasbon('${esc(k.id)}')">${ic('edit')}Ubah</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delKasbon('${esc(k.id)}')">${ic('trash')}</button></td></tr>`).join('')
+    : emptyRow(6, 'Belum ada kasbon yang cair pada periode ini.', 'coins');
+  $('#kasCairFoot').innerHTML = cair.length ? `<tr><td colspan="4">Jumlah &raquo;</td><td class="num c-green">${nf(sum(cair))}</td><td></td></tr>` : '';
+  $('#kasPendBody').innerHTML = pend.length ? pend.map((k, i) => `<tr><td>${i + 1}</td><td>${name(k)}</td><td class="nowrap">${fmtDate(k.reqDate)}</td><td>${esc(k.note) || '<span class="muted">-</span>'}</td>
+    <td class="num c-orange">${nf(k.amount)}</td><td class="acts"><button class="btn btn-success btn-sm" onclick="openCair('${esc(k.id)}')">${ic('check')}Cairkan</button><button class="btn btn-ghost btn-sm btn-icon" title="Ubah" onclick="openKasbon('${esc(k.id)}')">${ic('edit')}</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delKasbon('${esc(k.id)}')">${ic('trash')}</button></td></tr>`).join('')
+    : emptyRow(6, 'Tidak ada pengajuan kasbon yang menunggu realisasi.', 'check');
+  $('#kasPendFoot').innerHTML = pend.length ? `<tr><td colspan="4">Jumlah &raquo;</td><td class="num c-orange">${nf(sum(pend))}</td><td></td></tr>` : '';
+  $('#kasPill').hidden = !pend.length; $('#kasPill').textContent = pend.length;
+}
+function openKasbon(id) {
+  const k = state.kasbon.find(x => x.id === id);
+  const list = state.employees.filter(e => isActive(e) || (k && e.empId === k.empId));
+  if (!list.length) return toast('Belum ada karyawan aktif di Master Data.', 'err');
+  $('#mKasTitle').textContent = k ? 'Ubah Kasbon' : 'Pengajuan Kasbon';
+  $('#kEmp').innerHTML = empOptions(list, '-- pilih karyawan --');
+  $('#kId').value = k ? k.id : ''; $('#kEmp').value = k ? k.empId : ''; $('#kEmp').disabled = !!k;
+  $('#kReq').value = k ? k.reqDate : todayISO(); $('#kAmt').value = k ? k.amount : ''; $('#kNote').value = k ? k.note : '';
+  $('#kStatus').value = k ? k.status : 'Pengajuan'; $('#kCair').value = k && k.cairDate ? k.cairDate : todayISO();
+  syncKasStatus(); openModal('mKas');
+}
+function syncKasStatus() { const c = $('#kStatus').value === 'Cair'; $('#kCairWrap').hidden = !c; $('#kCair').required = c; }
+$('#kStatus').addEventListener('change', syncKasStatus);
+$('#kasForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await safe(() => api('saveKasbon', { id: $('#kId').value, empId: $('#kEmp').value, reqDate: $('#kReq').value, amount: $('#kAmt').value,
+    note: $('#kNote').value, status: $('#kStatus').value, cairDate: $('#kStatus').value === 'Cair' ? $('#kCair').value : '' }));
+  if (r) { closeModal('mKas'); toast('Kasbon ' + r.name + ' tersimpan.', 'ok'); refresh(); }
+});
+function openCair(id) {
+  const k = state.kasbon.find(x => x.id === id); if (!k) return;
+  $('#cId').value = id; $('#cDate').value = todayISO();
+  $('#cairInfo').textContent = `${k.name} · ${rp(k.amount)}`;
+  openModal('mCair');
+}
+$('#cairForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await safe(() => api('cairKasbon', { id: $('#cId').value, cairDate: $('#cDate').value }));
+  if (r) { closeModal('mCair'); toast(`Kasbon ${r.name} ditandai cair (${fmtDate(r.cairDate)}).`, 'ok'); refresh(); }
+});
+async function delKasbon(id) {
+  const k = state.kasbon.find(x => x.id === id);
+  if (!confirm(`Hapus kasbon ${k ? k.name + ' ' + rp(k.amount) : ''}?`)) return;
+  const r = await safe(() => api('deleteKasbon', { id })); if (r) { toast('Kasbon dihapus.', 'ok'); refresh(); }
+}
+
+/* ============================ BATCH TRANSFER ======================== */
+function renderBatches() {
+  const B = state.batches, limit = state.settings.BATCH_LIMIT || 100000000;
+  const total = B.reduce((a, b) => a + b.total, 0), nb = B.reduce((a, b) => a + b.batches.length, 0);
+  $('#batchInfo').textContent = B.length ? `${B.length} bank · ${nb} batch · total ${rp(total)} · limit ${rp(limit)}/batch` : '';
+  $('#batchList').innerHTML = B.length ? B.map(bk => `<div class="bank-card">
+    <div class="bank-head"><h4>${ic('bank')}${esc(bk.bank)}</h4><span class="small">${bk.count} transfer &middot; ${bk.batches.length} batch</span>
+      <div class="sp"><b class="num">${rp(bk.total)}</b><button class="btn btn-ghost btn-sm" onclick="exportBatchXlsx('${esc(bk.bank)}')">${ic('sheet')}Excel ${esc(bk.bank)}</button></div></div>
+    ${bk.batches.map(b => `<div class="batch"><div class="batch-title"><span>Batch ${b.no} dari ${bk.batches.length}</span><span class="num">${rp(b.total)}</span></div>
+      ${b.overLimit ? '<div class="warn">Satu transfer melebihi limit batch. Mohon dipecah manual di sisi bank.</div>' : ''}
+      <div class="table-wrap boxed"><table><thead><tr><th>#</th><th>Penerima</th><th>Jenis</th><th>No Rekening</th><th>Job Site</th><th class="num">Nominal</th></tr></thead><tbody>
+      ${b.items.map((it, i) => `<tr><td>${i + 1}</td><td><span class="cell-main">${esc(it.name)}</span><div class="small">${esc(it.note)}</div></td><td><span class="badge b-${it.type}">${it.type}</span></td>
+        <td class="mono">${esc(it.accNo)}</td><td>${esc(it.jobSite)}</td><td class="num">${nf(it.amount)}</td></tr>`).join('')}
+      </tbody></table></div></div>`).join('')}</div>`).join('')
+    : `<div class="empty">${ic('bank', 'ic')}Belum ada data transfer. Input payroll terlebih dahulu.</div>`;
+}
+
+/* ============================ MUTASI KARYAWAN ======================= */
+function renderMutasi() {
+  const P = state.period, payBy = {};
+  state.payroll.forEach(r => payBy[r.empId] = r);
+  const sum = (a, k) => a.reduce((s, r) => s + (+r[k] || 0), 0);
+  // Karyawan baru: Tanggal Mulai Bekerja jatuh di periode ini
+  const baru = state.employees.filter(e => (e.startDate || '').slice(0, 7) === P).sort((a, b) => a.startDate.localeCompare(b.startDate) || a.name.localeCompare(b.name));
+  $('#newBody').innerHTML = baru.length ? baru.map((e, i) => { const p = payBy[e.empId] || {}; return `<tr><td>${i + 1}</td>
+    <td><span class="cell-main">${esc(e.name)}</span><div class="small mono">${esc(e.empId)}</div></td><td>${esc(e.position) || '-'}</td><td class="nowrap">${fmtDate(e.startDate)}</td><td>${esc(e.jobSite) || '-'}</td>
+    <td class="num">${p.id ? nf(p.gp) : '<span class="muted">-</span>'}</td><td class="num">${p.id ? nf(p.tl) : '<span class="muted">-</span>'}</td><td class="num ${p.id ? 'c-green' : ''}">${p.id ? nf(p.thp) : '<span class="small">belum ada payroll</span>'}</td></tr>`; }).join('')
+    : emptyRow(8, 'Tidak ada karyawan yang mulai bekerja pada periode ini.', 'uplus');
+  const bp = baru.map(e => payBy[e.empId]).filter(Boolean);
+  $('#newFoot').innerHTML = baru.length ? `<tr><td colspan="5">Jumlah &raquo; ${baru.length} karyawan</td><td class="num">${nf(sum(bp, 'gp'))}</td><td class="num">${nf(sum(bp, 'tl'))}</td><td class="num c-green">${nf(sum(bp, 'thp'))}</td></tr>` : '';
+  // Naik gaji
+  const R = state.raises.slice().sort((a, b) => a.name.localeCompare(b.name));
+  $('#raiseBody').innerHTML = R.length ? R.map((r, i) => { const e = empById(r.empId) || {}; return `<tr><td>${i + 1}</td>
+    <td><span class="cell-main">${esc(r.name)}</span><div class="small mono">${esc(r.empId)}</div>${r.note ? `<div class="small">${esc(r.note)}</div>` : ''}</td><td>${esc(e.position) || '-'}</td><td class="nowrap">${fmtDate(e.startDate)}</td><td>${esc(e.jobSite) || '-'}</td>
+    <td class="num">${nf(r.oldSalary)}</td><td class="num c-blue">+${nf(r.raise)}</td><td class="num c-green">${nf(r.newSalary)}</td>
+    <td class="acts"><button class="btn btn-ghost btn-sm btn-icon" title="Ubah" onclick="openRaise('${esc(r.id)}')">${ic('edit')}</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delRaise('${esc(r.id)}')">${ic('trash')}</button></td></tr>`; }).join('')
+    : emptyRow(9, 'Belum ada kenaikan gaji yang dicatat pada periode ini.', 'trend');
+  $('#raiseFoot').innerHTML = R.length ? `<tr><td colspan="5">Jumlah &raquo;</td><td class="num">${nf(sum(R, 'oldSalary'))}</td><td class="num c-blue">+${nf(sum(R, 'raise'))}</td><td class="num c-green">${nf(sum(R, 'newSalary'))}</td><td></td></tr>` : '';
+  // PHK
+  const H = state.phk.slice().sort((a, b) => a.phkDate.localeCompare(b.phkDate));
+  $('#phkBody').innerHTML = H.length ? H.map((h, i) => { const e = empById(h.empId) || {}; return `<tr><td>${i + 1}</td>
+    <td><span class="cell-main">${esc(h.name)}</span><div class="small mono">${esc(h.empId)}</div>${h.note ? `<div class="small">${esc(h.note)}</div>` : ''}</td><td>${esc(e.position) || '-'}</td>
+    <td class="nowrap">${fmtDate(e.startDate)}</td><td class="nowrap">${fmtDate(h.phkDate)}</td><td class="tenure">${tenureText(tenure(e.startDate, h.phkDate))}</td><td>${esc(e.jobSite) || '-'}</td>
+    <td style="min-width:160px">${esc(h.rights) || '<span class="muted">-</span>'}</td><td style="min-width:150px">${esc(h.reason)}</td><td class="num">${nf(h.amount)}</td>
+    <td class="acts"><button class="btn btn-ghost btn-sm btn-icon" title="Ubah" onclick="openPhk('${esc(h.id)}')">${ic('edit')}</button><button class="btn btn-danger btn-sm btn-icon" title="Hapus" onclick="delPhk('${esc(h.id)}')">${ic('trash')}</button></td></tr>`; }).join('')
+    : emptyRow(11, 'Tidak ada karyawan PHK pada periode ini.', 'ux');
+  $('#phkFoot').innerHTML = H.length ? `<tr><td colspan="9">Jumlah &raquo; ${H.length} karyawan</td><td class="num">${nf(sum(H, 'amount'))}</td><td></td></tr>` : '';
+}
+
+/* Naik gaji */
+function openRaise(id) {
+  const r = state.raises.find(x => x.id === id);
+  const list = state.employees.filter(e => isActive(e) || (r && e.empId === r.empId));
+  if (!list.length) return toast('Belum ada karyawan aktif di Master Data.', 'err');
+  $('#mRaiseTitle').textContent = r ? 'Ubah Kenaikan Gaji' : 'Catat Kenaikan Gaji';
+  $('#rEmp').innerHTML = empOptions(list, '-- pilih karyawan --');
+  $('#rId').value = r ? r.id : ''; $('#rEmp').value = r ? r.empId : ''; $('#rEmp').disabled = !!r;
+  $('#rOld').value = r ? r.oldSalary : ''; $('#rRaise').value = r ? r.raise : ''; $('#rNote').value = r ? r.note : '';
+  $('#rOldHint').textContent = 'Terisi otomatis dari Gaji Pokok payroll terakhir, bisa dikoreksi.';
+  syncRaise(); openModal('mRaise');
+}
+function syncRaise() { $('#rNew').value = nf((+$('#rOld').value || 0) + (+$('#rRaise').value || 0)); }
+['rOld','rRaise'].forEach(i => $('#' + i).addEventListener('input', syncRaise));
+$('#rEmp').addEventListener('change', async () => {
+  const id = $('#rEmp').value; if (!id || $('#rId').value) return;
+  const r = await safe(() => api('lastSalary', { period: state.period, empId: id }, { silent: true }));
+  if (r) { $('#rOld').value = r.gp || ''; $('#rOldHint').textContent = r.period ? `Gaji Pokok payroll ${periodLabel(r.period)}.` : 'Belum ada riwayat payroll, isi manual.'; syncRaise(); }
+});
+$('#raiseForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await safe(() => api('saveRaise', { id: $('#rId').value, period: state.period, empId: $('#rEmp').value, oldSalary: $('#rOld').value, raise: $('#rRaise').value, note: $('#rNote').value }));
+  if (r) { closeModal('mRaise'); toast('Kenaikan gaji ' + r.name + ' tersimpan.', 'ok'); refresh(); }
+});
+async function delRaise(id) {
+  if (!confirm('Hapus catatan kenaikan gaji ini?')) return;
+  const r = await safe(() => api('deleteRaise', { id })); if (r) { toast('Catatan dihapus.', 'ok'); refresh(); }
+}
+
+/* PHK */
+$('#hReason').innerHTML = '<option value="">-- pilih alasan --</option>' + PHK_REASONS.map(x => `<option>${esc(x)}</option>`).join('');
+$('#hRights').innerHTML = PHK_RIGHTS.map((x, i) => `<label class="chip-check" style="margin:0"><input type="checkbox" value="${esc(x)}" id="hr${i}"><span>${esc(x)}</span></label>`).join('');
+function openPhk(id) {
+  const h = state.phk.find(x => x.id === id);
+  const list = state.employees.filter(e => isActive(e) || (h && e.empId === h.empId));
+  if (!list.length) return toast('Belum ada karyawan aktif di Master Data.', 'err');
+  $('#mPhkTitle').textContent = h ? 'Ubah Data PHK' : 'Catat PHK Karyawan';
+  $('#hEmp').innerHTML = empOptions(list, '-- pilih karyawan --');
+  $('#hId').value = h ? h.id : ''; $('#hEmp').value = h ? h.empId : ''; $('#hEmp').disabled = !!h;
+  $('#hDate').value = h ? h.phkDate : todayISO();
+  const known = h && PHK_REASONS.includes(h.reason);
+  $('#hReason').value = h ? (known ? h.reason : 'Lainnya') : ''; $('#hOther').value = h && !known ? h.reason : '';
+  const rights = h ? String(h.rights || '').split(',').map(s => s.trim()) : [];
+  $$('#hRights input').forEach(c => c.checked = rights.includes(c.value));
+  $('#hAmt').value = h ? h.amount : 0; $('#hNote').value = h ? h.note : '';
+  syncPhk(); openModal('mPhk');
+}
+function syncPhk() {
+  const other = $('#hReason').value === 'Lainnya'; $('#hOtherWrap').hidden = !other; $('#hOther').required = other;
+  const e = empById($('#hEmp').value);
+  $('#hTenure').value = e ? tenureText(tenure(e.startDate, $('#hDate').value)) : '-';
+}
+['hReason','hEmp','hDate'].forEach(i => $('#' + i).addEventListener('change', syncPhk));
+$('#hRights').addEventListener('change', e => {
+  if (!e.target.matches('input')) return;
+  const none = $$('#hRights input').find(c => c.value === 'Tidak ada');
+  if (e.target === none && none.checked) $$('#hRights input').forEach(c => { if (c !== none) c.checked = false; });
+  else if (e.target !== none && e.target.checked) none.checked = false;
+});
+$('#phkForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const emp = empById($('#hEmp').value);
+  if (!$('#hId').value && emp && !confirm(`Simpan PHK untuk ${emp.name}?\nStatus karyawan akan diubah menjadi PHK.`)) return;
+  const reason = $('#hReason').value === 'Lainnya' ? $('#hOther').value.trim() : $('#hReason').value;
+  const r = await safe(() => api('savePhk', { id: $('#hId').value, empId: $('#hEmp').value, phkDate: $('#hDate').value, reason,
+    rights: $$('#hRights input:checked').map(c => c.value), amount: $('#hAmt').value, note: $('#hNote').value }));
+  if (r) { closeModal('mPhk'); toast('Data PHK ' + r.name + ' tersimpan.', 'ok'); refresh(); }
+});
+async function delPhk(id) {
+  if (!confirm('Hapus data PHK ini?\nCatatan: status karyawan TIDAK otomatis dikembalikan. Ubah manual di Master Karyawan bila perlu.')) return;
+  const r = await safe(() => api('deletePhk', { id })); if (r) { toast('Data PHK dihapus.', 'ok'); refresh(); }
+}
+
+/* =========================== ATURAN GAJI BPJS ============================ */
+$('#rbJkkLvl').innerHTML = JKK_LEVELS.map((l, i) => `<option value="${i}">Risiko ${l[0].toLowerCase()} (${pct(l[2])})</option>`).join('') + '<option value="c">Lainnya / manual</option>';
+$('#rbJkkLvl').addEventListener('change', () => { const v = $('#rbJkkLvl').value; if (v !== 'c') $('#rbJkk').value = +(JKK_LEVELS[+v][2] * 100).toFixed(4); });
+$('#rbJkk').addEventListener('input', syncJkkLvl);
+function syncJkkLvl() { const v = +$('#rbJkk').value / 100, i = JKK_LEVELS.findIndex(l => Math.abs(l[2] - v) < 1e-7); $('#rbJkkLvl').value = i >= 0 ? String(i) : 'c'; }
+const RB_FIELDS = { rbKesEe: 'RB_KES_EE', rbKesEr: 'RB_KES_ER', rbJhtEe: 'RB_JHT_EE', rbJhtEr: 'RB_JHT_ER', rbJpEe: 'RB_JP_EE', rbJpEr: 'RB_JP_ER', rbJkk: 'RB_JKK_ER', rbJkm: 'RB_JKM_ER' };
+function openBpjsSet() {
+  const S = state.settings, p = v => +((+v || 0) * 100).toFixed(4);
+  Object.keys(RB_FIELDS).forEach(id => $('#' + id).value = p(S[RB_FIELDS[id]]));
+  $('#rbKesCap').value = S.RB_KES_CAP || 0; $('#rbJpCap').value = S.RB_JP_CAP || 0; $('#rbUmk').value = S.RB_UMK || 0; syncJkkLvl();
+  openModal('mBpjs');
+}
+$('#bpjsForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const payload = { RB_KES_CAP: +$('#rbKesCap').value || 0, RB_JP_CAP: +$('#rbJpCap').value || 0, RB_UMK: +$('#rbUmk').value || 0 };
+  Object.keys(RB_FIELDS).forEach(id => payload[RB_FIELDS[id]] = (+$('#' + id).value || 0) / 100);
+  const r = await safe(() => api('saveSettings', payload));
+  if (r) { closeModal('mBpjs'); toast('Aturan Gaji BPJS tersimpan.', 'ok'); refresh(); }
+});
+
+function openRefs() {
+  const S = state.settings, T = state.tax, rup = n => 'Rp' + nf(n);
+  const tbl = (head, rows, numCols = []) => `<div class="table-wrap boxed"><table><thead><tr>${head.map((h, i) => `<th${numCols.includes(i) ? ' class="num"' : ''}>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td${numCols.includes(i) ? ' class="num"' : ''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const cats = { A: [], B: [], C: [] }; Object.keys(T.cat || {}).forEach(k => cats[T.cat[k]] && cats[T.cat[k]].push(k));
+  const terTbl = c => { let lo = 0; return tbl(['Penghasilan bruto bulanan', 'Tarif'], (T.ter[c] || []).map(([hi, r]) => { const s = hi === null ? `Lebih dari ${rup(lo)}` : lo === 0 ? `s.d. ${rup(hi)}` : `${rup(lo + 1)} s.d. ${rup(hi)}`; lo = hi; return [s, String(r).replace('.', ',') + '%']; }), [1]); };
+  $('#refsBody').innerHTML = `
+    <h4>BPJS Ketenagakerjaan</h4>
+    ${tbl(['Jaminan', 'Pekerja', 'Pemberi Kerja', 'Batas Upah', 'Aturan Gaji BPJS'], [
+      ['JHT (Jaminan Hari Tua)', '2%', '3,7%', 'Tanpa plafon', `${pct(S.RB_JHT_EE)} / ${pct(S.RB_JHT_ER)}`],
+      ['JP (Jaminan Pensiun)', '1%', '2%', `Plafon upah (aturan: ${rup(S.RB_JP_CAP)})`, `${pct(S.RB_JP_EE)} / ${pct(S.RB_JP_ER)}`],
+      ['JKK (Kecelakaan Kerja)', '-', '0,24% - 1,74% (sesuai risiko)', 'Tanpa plafon', pct(S.RB_JKK_ER)],
+      ['JKM (Kematian)', '-', '0,3%', 'Tanpa plafon', pct(S.RB_JKM_ER)]])}
+    <div class="hint">Batas minimal upah dasar = UMK/UMP. Plafon JP disesuaikan setiap tahun oleh BPJS Ketenagakerjaan (batas terakhir yang terkonfirmasi: <b>Rp10.547.400</b>); cek surat edaran terbaru lalu perbarui di Pengaturan BPJS.</div>
+    <h4>Tingkat Risiko JKK (PP 44/2015 Pasal 16)</h4>
+    ${tbl(['Tingkat risiko', 'Tarif nominal', 'Tarif efektif*'], JKK_LEVELS.map(l => [l[0], pct(l[1]), pct(l[2])]), [1, 2])}
+    <div class="hint">*Setelah rekomposisi 0,14% iuran JKK untuk program JKP (PP 37/2021 s.t.d.d. PP 6/2025). Iuran JKM kembali penuh 0,3%.</div>
+    <h4>BPJS Kesehatan</h4>
+    ${tbl(['Pekerja', 'Pemberi Kerja', 'Batas Minimal', 'Batas Maksimal'], [['1%', '4%', 'UMK/UMP', rup(12000000)]])}
+    <h4>Penghasilan Tidak Kena Pajak (PTKP) per Tahun</h4>
+    ${tbl(['Status', 'PTKP', 'Kategori TER'], Object.keys(T.ptkp || {}).map(k => [k, rup(T.ptkp[k]), 'TER ' + T.cat[k]]).concat([
+      ['K/I/0 *', rup(112500000), '-'], ['K/I/1 *', rup(117000000), '-'], ['K/I/2 *', rup(121500000), '-'], ['K/I/3 *', rup(126000000), '-']]), [1])}
+    <div class="hint">Koreksi dari tabel lama: PTKP <b>K/1 = Rp63.000.000</b> (bukan Rp65.000.000). *K/I (penghasilan istri digabung suami) hanya untuk SPT Tahunan, tidak dipakai pemotongan bulanan.</div>
+    <h4>Tarif PPh Pasal 17 (UU HPP) - dipakai untuk masa Desember / tahunan</h4>
+    ${tbl(['Penghasilan Kena Pajak setahun', 'Tarif'], [['s.d. Rp60.000.000', '5%'], ['> Rp60 juta s.d. Rp250 juta', '15%'], ['> Rp250 juta s.d. Rp500 juta', '25%'], ['> Rp500 juta s.d. Rp5 miliar', '30%'], ['> Rp5 miliar', '35%']], [1])}
+    <h4>Tarif Efektif Rata-rata (TER) Bulanan - PP 58/2023</h4>
+    <div class="hint" style="margin:-2px 0 10px">TER A: ${cats.A.join(', ')} &middot; TER B: ${cats.B.join(', ')} &middot; TER C: ${cats.C.join(', ')}. Bruto = gaji + tunjangan + THR + premi JKK, JKM &amp; BPJS Kesehatan yang dibayar pemberi kerja.</div>
+    ${['A', 'B', 'C'].map(c => `<details class="ter"><summary>Tabel TER Kategori ${c}</summary>${terTbl(c)}</details>`).join('')}
+    <h4>Dasar Hukum</h4>
+    <ul class="law">
+      <li>UU PPh No. 36/2008 s.t.d.t.d. UU No. 7/2021 (HPP) - tarif Pasal 17</li>
+      <li>PP No. 58/2023 - tarif pemotongan PPh 21 (TER), berlaku 1 Januari 2024</li>
+      <li>PMK No. 168/2023 - petunjuk pelaksanaan pemotongan PPh 21/26 (menggantikan PER-16/PJ/2016)</li>
+      <li>PMK No. 101/PMK.010/2016 - besaran PTKP</li>
+      <li>PP No. 44/2015 s.t.d.t.d. PP No. 82/2019 - JKK &amp; JKM</li>
+      <li>PP No. 45/2015 - Jaminan Pensiun</li>
+      <li>PP No. 46/2015 s.t.d.d. PP No. 60/2015 - Jaminan Hari Tua</li>
+      <li>PP No. 37/2021 s.t.d.d. PP No. 6/2025 - JKP &amp; rekomposisi iuran JKK</li>
+      <li>Perpres No. 82/2018 s.t.d.t.d. Perpres No. 59/2024 - Jaminan Kesehatan</li>
+    </ul>`;
+  openModal('mRefs');
+}
+
+/* ================================ PDF =============================== */
+const NAVY = [10, 31, 60], BLUE = [11, 99, 182], GREEN = [18, 144, 79], AMBER = [234, 132, 20];
+function pdfHeader(doc, title, sub) {
+  const W = doc.internal.pageSize.getWidth(), S = state.settings;
+  doc.setFillColor(...NAVY); doc.rect(0, 0, W, 30, 'F');
+  const st = [[124, 194, 66], [234, 132, 20], [0, 166, 224], [11, 99, 182]];
+  st.forEach((c, i) => { doc.setFillColor(...c); doc.rect(W / 4 * i, 30, W / 4, 1.3, 'F'); });
+  doc.setFillColor(255, 255, 255); doc.roundedRect(12, 5.5, 19, 19, 3, 3, 'F');
+  try { doc.addImage(LOGO, 'PNG', 13.5, 7, 16, 16); } catch (e) { }
+  doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.text(S.COMPANY_NAME || 'PT. Prohaba Jaya Mandiri', 36, 13);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+  if (S.COMPANY_ADDRESS) doc.text(String(S.COMPANY_ADDRESS).slice(0, 70), 36, 18.5);
+  doc.setTextColor(170, 190, 215); doc.text('E-PAYROLL PJM', 36, S.COMPANY_ADDRESS ? 23.5 : 18.5);
+  doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text(title, W - 14, 13, { align: 'right' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text(sub, W - 14, 19, { align: 'right' });
+  doc.setTextColor(15, 23, 42);
+}
+function pdfFooters(doc) {
+  const n = doc.internal.getNumberOfPages(), W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  for (let i = 1; i <= n; i++) {
+    doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
+    doc.text('Dokumen dihasilkan otomatis oleh E-PAYROLL PJM - ' + new Date().toLocaleString('id-ID'), 14, H - 8);
+    doc.text('Halaman ' + i + ' / ' + n, W - 14, H - 8, { align: 'right' });
+  }
+}
+function pdfSlip(id) {
+  const r = state.payroll.find(x => x.id === id); if (!r) return;
+  const emp = empById(r.empId) || {};
+  const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' }), W = 210;
+  pdfHeader(doc, 'SLIP GAJI', 'Periode ' + periodLabel(r.period));
+  const mono = { font: 'courier', halign: 'right', fontStyle: 'bold' };
+  doc.autoTable({
+    startY: 38, theme: 'plain', styles: { fontSize: 9.5, cellPadding: 1.4 }, margin: { left: 14, right: 14 },
+    body: [['Nama', ': ' + r.name, 'ID Karyawan', ': ' + r.empId], ['Jabatan', ': ' + (emp.position || '-'), 'Departemen', ': ' + (emp.dept || '-')],
+      ['Job Site', ': ' + (r.jobSite || '-'), 'Status', ': ' + (emp.status || '-')], ['Bank', ': ' + (r.bank || '-'), 'No Rekening', ': ' + (r.accNo || '-')],
+      ['Mulai Kerja', ': ' + (emp.startDate ? fmtDate(emp.startDate) : '-'), 'Masa Kerja', ': ' + tenureText(empTenure(emp))]],
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 24 }, 1: { cellWidth: 70 }, 2: { fontStyle: 'bold', cellWidth: 28 } }
+  });
+  let y = doc.lastAutoTable.finalY + 5;
+  doc.autoTable({
+    startY: y, margin: { left: 14, right: 14 }, theme: 'grid', styles: { fontSize: 9.5, cellPadding: 2.2 },
+    headStyles: { fillColor: NAVY, textColor: 255 }, columnStyles: { 1: mono },
+    head: [['PENERIMAAN', 'Nominal']],
+    body: [['Gaji Pokok', rp(r.gp)], ['Tunjangan Lapangan', rp(r.tl)], ['THR', rp(r.thr)]],
+    foot: [['Penghasilan Bruto', rp(r.bruto)]], footStyles: { fillColor: [241, 245, 249], textColor: NAVY, fontStyle: 'bold' }, showFoot: 'lastPage'
+  });
+  y = doc.lastAutoTable.finalY + 5; const S = state.settings;
+  doc.autoTable({
+    startY: y, margin: { left: 14, right: 14 }, theme: 'grid', styles: { fontSize: 9.5, cellPadding: 2.2 },
+    headStyles: { fillColor: AMBER, textColor: 255 }, columnStyles: { 1: mono },
+    head: [['PENGURANG', 'Nominal']],
+    body: [['Potongan Kasbon', rp(r.potKas)], ['BPJS JHT Pekerja', rp(r.jht)], ['BPJS JP Pekerja', rp(r.jp)], ['BPJS Kesehatan Pekerja', rp(r.kes)]],
+    foot: [['Total Pengurang', rp(r.totalPeng)]], footStyles: { fillColor: [254, 243, 199], textColor: [146, 64, 14], fontStyle: 'bold' }, showFoot: 'lastPage'
+  });
+  y = doc.lastAutoTable.finalY + 5;
+  doc.autoTable({
+    startY: y, margin: { left: 14, right: 14 }, theme: 'plain', styles: { fontSize: 9, cellPadding: 1.3, textColor: [71, 85, 105] }, columnStyles: { 1: { font: 'courier', halign: 'right' } },
+    body: [['Sisa Kasbon Bulan Lalu', rp(r.kasLalu)], ['Potongan Kasbon Bulan Ini', rp(r.potKas)], ['Sisa Kasbon Bulan Ini', rp(r.sisaKas)]]
+  });
+  y = doc.lastAutoTable.finalY + 6;
+  doc.setFillColor(...GREEN); doc.roundedRect(14, y, W - 28, 20, 3, 3, 'F');
+  doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.text('GAJI BERSIH (TAKE HOME PAY)', 20, y + 8);
+  doc.setFont('courier', 'bold'); doc.setFontSize(17); doc.text(rp(r.thp), W - 20, y + 14, { align: 'right' });
+  doc.setTextColor(15, 23, 42); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+  doc.text('Slip ini sah tanpa tanda tangan karena dihasilkan secara elektronik.', 14, y + 30);
+  pdfFooters(doc);
+  doc.save(`Slip_Gaji_${r.empId}_${r.name.replace(/\s+/g, '_')}_${r.period}.pdf`);
+}
+/* ============================ RULES & SETTINGS ====================== */
+function openRules() {
+  const S = state.settings;
+  const rules = [
+    ['Penghasilan Bruto (Jumlah Penghasilan)', 'Gaji Pokok + Tunjangan Lapangan + THR'],
+    ['Sisa Kasbon Bulan Lalu', 'Sisa kasbon payroll terakhir + kasbon yang CAIR bulan sebelumnya'],
+    ['Sisa Kasbon Bulan Ini', 'Sisa Kasbon Bulan Lalu - Potongan Kasbon'],
+    ['BPJS JHT, JP & Kesehatan Pekerja', 'Diinput manual per karyawan (perhitungan khusus, tanpa rumus persen)'],
+    ['Jumlah Pengurang', 'Potongan Kasbon + JHT + JP + BPJS Kesehatan'],
+    ['Penghasilan Bersih / Gaji Bersih', 'Penghasilan Bruto - Jumlah Pengurang']
+  ];
+  $('#rulesBody').innerHTML = rules.map((r, i) => `<div class="rule"><i>${i + 1}</i><div><b>${esc(r[0])}</b><code>${esc(r[1])}</code></div></div>`).join('') +
+    `<div class="rule"><i>+</i><div><b>Headcount</b><code>Nama/ID ganda pada periode yang sama = 1 headcount.</code></div></div>
+     <div class="rule"><i>+</i><div><b>3 Jenis Gaji (masing-masing berdiri sendiri)</b><code>1. Gaji Real  = Gaji Bersih di Payroll (rumus di atas)
+2. Gaji BPJS  = MAX(Gaji Pokok, UMK Rp ${nf(S.RB_UMK)}) atau nominal manual; iuran memakai Aturan Gaji BPJS
+3. Gaji Pajak = komponen terpilih (${esc(S.RT_COMP || '')}) atau nominal manual; PPh 21 = TER x Gaji Pajak
+Gaji BPJS & Gaji Pajak tidak mengubah Gaji Real.</code></div></div>
+     <div class="rule"><i>+</i><div><b>Salin &amp; Konfirmasi Payroll</b><code>Salin dari bulan lalu menghasilkan baris DRAFT (ikut dihitung di total &amp; batch). Koreksi lewat tombol Edit, lalu Konfirmasi.</code></div></div>
+     <div class="rule"><i>+</i><div><b>Entri Ganda Payroll</b><code>Satu karyawan = satu baris payroll per periode. Input ulang / bulk ulang menggantikan data lama.</code></div></div>
+     <div class="rule"><i>+</i><div><b>Kasbon</b><code>Kasbon cair bulan ini dipotong mulai payroll bulan depan dan tidak masuk Batch Transfer Bank.</code></div></div>
+     <div class="rule"><i>+</i><div><b>Batch Transfer</b><code>Per bank, dipecah otomatis maksimal Rp ${nf(S.BATCH_LIMIT)} per batch.</code></div></div>
+     <div class="hint" style="margin-top:12px">Konstanta tersimpan di sheet <b>Settings</b>. Potongan Payroll diubah di <b>Pengaturan</b>; aturan Gaji BPJS &amp; Gaji Pajak di menu masing-masing.</div>`;
+  toggleNav(false); openModal('mRules');
+}
+function openSettings() {
+  const S = state.settings;
+  $('#sCo').value = S.COMPANY_NAME || ''; $('#sAddr').value = S.COMPANY_ADDRESS || ''; $('#sBatch').value = S.BATCH_LIMIT;
+  toggleNav(false); openModal('mSet');
+}
+$('#setForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await safe(() => api('saveSettings', { COMPANY_NAME: $('#sCo').value, COMPANY_ADDRESS: $('#sAddr').value, BATCH_LIMIT: +$('#sBatch').value }));
+  if (r) { closeModal('mSet'); toast('Pengaturan tersimpan.', 'ok'); refresh(); }
+});
+$('#passForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if ($('#pwNew').value !== $('#pwNew2').value) return toast('Konfirmasi password tidak sama.', 'err');
+  const r = await safe(() => api('changePassword', { oldPassword: $('#pwOld').value, newPassword: $('#pwNew').value }));
+  if (r) { closeModal('mPass'); $('#passForm').reset(); toast('Password berhasil diganti.', 'ok'); }
+});
+
+/* ============================ CSV / FILE UTIL ======================= */
+function toCSV(rows, d) {
+  return '﻿' + rows.map(r => r.map(c => { c = String(c ?? ''); return (c.includes(d) || /["\r\n]/.test(c)) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(d)).join('\r\n');
+}
+function downloadFile(name, content, mime) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], { type: (mime || 'text/plain') + ';charset=utf-8' }));
+  a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function readText(file) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result)); fr.onerror = () => rej(new Error('Gagal membaca file.')); fr.readAsText(file, 'UTF-8'); }); }
+function parseCSV(text) {
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/).find(l => l.trim() && !/^sep=/i.test(l)) || '';
+  const cnt = { ',': (first.match(/,/g) || []).length, ';': (first.match(/;/g) || []).length, '\t': (first.match(/\t/g) || []).length };
+  const d = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === d) { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); cell = ''; rows.push(row); row = []; }
+    else cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  const clean = rows.filter(r => r.some(x => String(x).trim() !== '') && !/^sep=/i.test(String(r[0])));
+  if (clean.length < 2) return [];
+  const head = clean[0].map(h => h.trim());
+  return clean.slice(1).map(r => { const o = {}; head.forEach((h, i) => o[h] = (r[i] ?? '').trim()); return o; });
+}
+initApp();
+</script>
+</body>
+</html>
