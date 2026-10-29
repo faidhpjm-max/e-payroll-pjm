@@ -602,7 +602,20 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
           <div class="card-head bordered">
             <h3><span class="hi hi-blue"><svg class="ic ic-sm"><use href="#i-coins"/></svg></span>Saldo Kasbon per Karyawan <span class="sub" style="font-weight:500">(<span class="kasPer"></span>)</span></h3>
             <span class="sub">Angka sama dengan kolom kasbon di Payroll</span>
-            <div class="sp"><div class="search" style="min-width:240px"><svg class="ic ic-sm"><use href="#i-search"/></svg><input id="ksQ" placeholder="Cari nama atau ID..."></div></div>
+            <div class="sp" style="align-items:center">
+              <select id="ksSite" style="width:auto;flex:1 1 170px"></select>
+              <select id="ksSort" style="width:auto;flex:1 1 230px">
+                <option value="name">Urut: Nama A-Z</option>
+                <option value="site">Urut: Job Site A-Z</option>
+                <option value="lalu-desc">Sisa Kasbon Bulan Lalu terbesar</option>
+                <option value="lalu-asc">Sisa Kasbon Bulan Lalu terkecil</option>
+                <option value="sisa-desc">Sisa Setelah Potongan terbesar</option>
+                <option value="sisa-asc">Sisa Setelah Potongan terkecil</option>
+                <option value="saldo-desc">Saldo Akhir terbesar</option>
+                <option value="saldo-asc">Saldo Akhir terkecil</option>
+              </select>
+              <div class="search" style="flex:1 1 220px"><svg class="ic ic-sm"><use href="#i-search"/></svg><input id="ksQ" placeholder="Cari nama atau ID..."></div>
+            </div>
           </div>
           <div class="table-wrap fz" style="max-height:60vh"><table class="pay-table">
             <thead><tr><th class="l" style="width:56px">No.</th><th class="l sticky-col">Karyawan</th><th class="l">Job Site</th>
@@ -985,6 +998,12 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
   <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('mPass')">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>
 </div></div>
 
+<div class="modal" id="mAsk"><div class="modal-box xs">
+  <div class="modal-head"><h3>Konfirmasi</h3><button class="x" onclick="askDone(false)"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="modal-body"><div id="askMsg" style="white-space:pre-line;line-height:1.5"></div></div>
+  <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="askDone(false)">Batal</button><button type="button" class="btn btn-primary" id="askOk" onclick="askDone(true)">Ya, lanjutkan</button></div>
+</div></div>
+
 <div id="toast"></div>
 <div id="loading"><div class="spin"></div></div>
 
@@ -1047,8 +1066,24 @@ function toast(msg, type) {
 }
 function openModal(id) { $('#userMenu').classList.remove('open'); $('#' + id).classList.add('open'); }
 function closeModal(id) { $('#' + id).classList.remove('open'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { $$('.modal.open').forEach(m => m.classList.remove('open')); toggleNav(false); } });
-$$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('open'); }));
+/* Dialog konfirmasi milik aplikasi (pengganti window.confirm, yang diblokir di sebagian browser/embed). */
+let askResolve = null;
+function ask(msg) {
+  const del = /^Hapus/.test(msg);
+  $('#askMsg').textContent = msg;
+  $('#askOk').className = 'btn ' + (del ? 'btn-danger' : 'btn-primary');
+  $('#askOk').textContent = del ? 'Ya, hapus' : 'Ya, lanjutkan';
+  if (askResolve) askResolve(false);
+  openModal('mAsk');
+  return new Promise(r => { askResolve = r; });
+}
+function askDone(ok) { closeModal('mAsk'); const r = askResolve; askResolve = null; if (r) r(ok); }
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('#mAsk').classList.contains('open')) { askDone(false); return; }
+  $$('.modal.open').forEach(m => m.classList.remove('open')); toggleNav(false);
+});
+$$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) { if (m.id === 'mAsk') askDone(false); else m.classList.remove('open'); } }));
 document.addEventListener('click', e => { if (!e.target.closest('.user')) $('#userMenu').classList.remove('open'); });
 function toggleMenu(e) { e.stopPropagation(); $('#userMenu').classList.toggle('open'); }
 function toggleNav(force) { document.body.classList.toggle('nav-open', force === undefined ? !document.body.classList.contains('nav-open') : force); }
@@ -1285,7 +1320,7 @@ $('#empForm').addEventListener('submit', async e => {
 });
 async function delEmp(id) {
   const e = empById(id);
-  if (!confirm(`Hapus karyawan ${e ? e.name : id}?`)) return;
+  if (!await ask(`Hapus karyawan ${e ? e.name : id}?`)) return;
   const r = await safe(() => api('deleteEmployee', { empId: id }));
   if (r) { toast('Karyawan dihapus.', 'ok'); refresh(); }
 }
@@ -1356,7 +1391,7 @@ function renderPayroll() {
     <td class="num bl tot-out">${nf(sum('totalPeng'))}</td><td class="num bl net">${nf(sum('thp'))}</td><td class="bl"></td></tr>` : '';
 }
 async function delPay(id) {
-  if (!confirm('Hapus baris payroll ini?')) return;
+  if (!await ask('Hapus baris payroll ini?')) return;
   const r = await safe(() => api('deletePayroll', { id })); if (r) { toast('Baris payroll dihapus.', 'ok'); refresh(); }
 }
 
@@ -1378,7 +1413,7 @@ async function openRecalc() {
   openModal('mRecalc');
 }
 async function applyRecalc() {
-  if (!confirm(`Hitung ulang & simpan Jumlah Pengurang dan Gaji Bersih periode ${periodLabel(state.period)}?`)) return;
+  if (!await ask(`Hitung ulang & simpan Jumlah Pengurang dan Gaji Bersih periode ${periodLabel(state.period)}?`)) return;
   const r = await safe(() => api('recalcPeriod', { period: state.period, apply: true }));
   if (r) { closeModal('mRecalc'); toast(`${r.applied} baris dihitung ulang.`, 'ok'); refresh(); }
 }
@@ -1411,7 +1446,7 @@ async function confirmPay(id) {
 }
 async function confirmAll() {
   const n = state.payroll.filter(r => r.status === 'DRAFT').length;
-  if (!n || !confirm(`Konfirmasi ${n} baris payroll DRAFT periode ${periodLabel(state.period)}?\nPastikan data sudah dikoreksi.`)) return;
+  if (!n || !await ask(`Konfirmasi ${n} baris payroll DRAFT periode ${periodLabel(state.period)}?\nPastikan data sudah dikoreksi.`)) return;
   const r = await safe(() => api('confirmPayroll', { period: state.period }));
   if (r) { toast(`${r.count} baris payroll dikonfirmasi.`, 'ok'); refresh(); }
 }
@@ -1441,7 +1476,7 @@ $('#payForm').addEventListener('submit', async e => {
     return;
   }
   const id = $('#pEmp').value, dup = state.payroll.find(r => r.empId === id);
-  if (dup && !confirm(`${dup.name} sudah memiliki payroll periode ${periodLabel(state.period)}.\nGanti data lama dengan input ini?`)) return;
+  if (dup && !await ask(`${dup.name} sudah memiliki payroll periode ${periodLabel(state.period)}.\nGanti data lama dengan input ini?`)) return;
   const r = await safe(() => api('savePayroll', { period: state.period, empId: id, gp: $('#pGp').value, tl: $('#pTl').value, thr: $('#pThr').value, kasLalu: $('#pKasLalu').value, potKas: $('#pPot').value, jht: $('#pJht').value, jp: $('#pJp').value, kes: $('#pKes').value, replace: !!dup }));
   if (r) { closeModal('mPay'); toast('Payroll ' + r.name + ' tersimpan.', 'ok'); refresh(); }
 });
@@ -1535,7 +1570,7 @@ $('#repAllForm').addEventListener('submit', async e => {
   e.preventDefault();
   const ids = state.raIds, mode = $('#raMode input:checked').value, field = $('#raField').value;
   const label = { value: 'nominal ' + rp($('#raVal').value), thp: 'Gaji Real', gp: 'Gaji Pokok', bruto: 'Penghasilan Bruto', auto: 'nilai otomatis' }[mode];
-  if (!confirm(`Terapkan ${label} ke ${ids.length} karyawan?`)) return;
+  if (!await ask(`Terapkan ${label} ke ${ids.length} karyawan?`)) return;
   const r = await safe(() => api('setReportBase', { period: state.period, ids, field, mode, value: $('#raVal').value }));
   if (r) { closeModal('mRepAll'); toast(`${r.count} karyawan diperbarui.`, 'ok'); refresh(); }
 });
@@ -1551,7 +1586,7 @@ function openPtkp(k) {
 }
 $('#ptkpForm').addEventListener('submit', async e => {
   e.preventDefault();
-  if (!confirm(`Set Status PTKP ${$('#ptVal').value} untuk ${state.ptIds.length} karyawan?`)) return;
+  if (!await ask(`Set Status PTKP ${$('#ptVal').value} untuk ${state.ptIds.length} karyawan?`)) return;
   const r = await safe(() => api('setPtkp', { empIds: state.ptIds, ptkp: $('#ptVal').value }));
   if (r) { closeModal('mPtkp'); toast(`PTKP ${r.count} karyawan diperbarui.`, 'ok'); refresh(); }
 });
@@ -1576,7 +1611,7 @@ $('#moveForm').addEventListener('submit', async e => {
   const to = $('#mvTo').value;
   if (!/^\d{4}-\d{2}$/.test(to)) return toast('Pilih periode tujuan.', 'err');
   if (to === state.period) return toast('Periode tujuan tidak boleh sama.', 'err');
-  if (!confirm(`Pindahkan ${state.payroll.length} baris payroll dari ${periodLabel(state.period)} ke ${periodLabel(to)}?`)) return;
+  if (!await ask(`Pindahkan ${state.payroll.length} baris payroll dari ${periodLabel(state.period)} ke ${periodLabel(to)}?`)) return;
   const r = await safe(() => api('movePeriod', { from: state.period, to })); if (!r) return;
   closeModal('mMove'); toast(`${r.count} baris dipindahkan ke ${periodLabel(to)}. Periode ${periodLabel(state.period)} sekarang kosong.`, 'ok');
   refresh();
@@ -1584,9 +1619,22 @@ $('#moveForm').addEventListener('submit', async e => {
 
 /* ========================= SALDO KASBON (Kasbon) ========================= */
 $('#ksQ').addEventListener('input', renderKasSaldo);
+['ksSite', 'ksSort'].forEach(id => $('#' + id).addEventListener('change', renderKasSaldo));
+const KS_SORT = {
+  name: (a, b) => a.name.localeCompare(b.name),
+  site: (a, b) => (a.jobSite || '~').localeCompare(b.jobSite || '~') || a.name.localeCompare(b.name),
+  'lalu-desc': (a, b) => b.kasLalu - a.kasLalu, 'lalu-asc': (a, b) => a.kasLalu - b.kasLalu,
+  'sisa-desc': (a, b) => b.sisaKas - a.sisaKas, 'sisa-asc': (a, b) => a.sisaKas - b.sisaKas,
+  'saldo-desc': (a, b) => b.saldo - a.saldo, 'saldo-asc': (a, b) => a.saldo - b.saldo
+};
 function renderKasSaldo() {
+  const cur = $('#ksSite').value;
+  const sites = [...new Set(state.kasbonSaldo.map(r => r.jobSite).filter(Boolean))].sort();
+  $('#ksSite').innerHTML = '<option value="">Semua Job Site</option>' + sites.map(s => `<option ${s === cur ? 'selected' : ''}>${esc(s)}</option>`).join('');
+  const site = $('#ksSite').value, sort = KS_SORT[$('#ksSort').value] || KS_SORT.name;
   const q = $('#ksQ').value.trim().toLowerCase();
-  const rows = state.kasbonSaldo.filter(r => !q || [r.name, r.empId].some(v => String(v || '').toLowerCase().includes(q)));
+  const rows = state.kasbonSaldo.filter(r => (!site || r.jobSite === site) && (!q || [r.name, r.empId].some(v => String(v || '').toLowerCase().includes(q))))
+    .sort((a, b) => sort(a, b) || a.name.localeCompare(b.name));
   $('#ksBody').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td>
     <td class="sticky-col" style="min-width:190px"><span class="cell-main">${esc(r.name)}</span><div class="small mono">${esc(r.empId)}${r.hasPay ? '' : ' &middot; belum ada payroll'}</div></td><td class="nowrap">${esc(r.jobSite) || '-'}</td>
     <td class="num bl">${nf(r.kasLalu)}</td><td class="num">${nf(r.potKas)}</td><td class="num">${nf(r.sisaKas)}</td>
@@ -1937,7 +1985,7 @@ $('#cairForm').addEventListener('submit', async e => {
 });
 async function delKasbon(id) {
   const k = state.kasbon.find(x => x.id === id);
-  if (!confirm(`Hapus kasbon ${k ? k.name + ' ' + rp(k.amount) : ''}?`)) return;
+  if (!await ask(`Hapus kasbon ${k ? k.name + ' ' + rp(k.amount) : ''}?`)) return;
   const r = await safe(() => api('deleteKasbon', { id })); if (r) { toast('Kasbon dihapus.', 'ok'); refresh(); }
 }
 
@@ -2015,7 +2063,7 @@ $('#raiseForm').addEventListener('submit', async e => {
   if (r) { closeModal('mRaise'); toast('Kenaikan gaji ' + r.name + ' tersimpan.', 'ok'); refresh(); }
 });
 async function delRaise(id) {
-  if (!confirm('Hapus catatan kenaikan gaji ini?')) return;
+  if (!await ask('Hapus catatan kenaikan gaji ini?')) return;
   const r = await safe(() => api('deleteRaise', { id })); if (r) { toast('Catatan dihapus.', 'ok'); refresh(); }
 }
 
@@ -2052,14 +2100,14 @@ $('#hRights').addEventListener('change', e => {
 $('#phkForm').addEventListener('submit', async e => {
   e.preventDefault();
   const emp = empById($('#hEmp').value);
-  if (!$('#hId').value && emp && !confirm(`Simpan PHK untuk ${emp.name}?\nStatus karyawan akan diubah menjadi PHK.`)) return;
+  if (!$('#hId').value && emp && !await ask(`Simpan PHK untuk ${emp.name}?\nStatus karyawan akan diubah menjadi PHK.`)) return;
   const reason = $('#hReason').value === 'Lainnya' ? $('#hOther').value.trim() : $('#hReason').value;
   const r = await safe(() => api('savePhk', { id: $('#hId').value, empId: $('#hEmp').value, phkDate: $('#hDate').value, reason,
     rights: $$('#hRights input:checked').map(c => c.value), amount: $('#hAmt').value, note: $('#hNote').value }));
   if (r) { closeModal('mPhk'); toast('Data PHK ' + r.name + ' tersimpan.', 'ok'); refresh(); }
 });
 async function delPhk(id) {
-  if (!confirm('Hapus data PHK ini?\nCatatan: status karyawan TIDAK otomatis dikembalikan. Ubah manual di Master Karyawan bila perlu.')) return;
+  if (!await ask('Hapus data PHK ini?\nCatatan: status karyawan TIDAK otomatis dikembalikan. Ubah manual di Master Karyawan bila perlu.')) return;
   const r = await safe(() => api('deletePhk', { id })); if (r) { toast('Data PHK dihapus.', 'ok'); refresh(); }
 }
 
