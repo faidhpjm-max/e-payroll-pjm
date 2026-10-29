@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <base target="_top">
 <title>E-PAYROLL PJM</title>
+<script>try { if (localStorage.getItem('pjm_theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch (e) { }</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -196,6 +197,25 @@ main{padding:24px 28px 56px;width:100%;max-width:1640px;margin:0 auto;flex:1}
 .stat .foot{font-size:12px;color:var(--muted);margin-top:4px}
 .stat.hero{background:linear-gradient(140deg,var(--navy),#0d3a72);border-color:transparent;color:#fff}
 .stat.hero .lbl,.stat.hero .foot{color:#a9bcd6}.stat.hero .chip{background:rgba(255,255,255,.12);color:#fff}
+/* Kartu statistik seragam: garis aksen atas sesuai warna ikon */
+.stat{--acc:var(--blue)}
+.stat::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--acc)}
+.stat.acc-green{--acc:var(--green)}.stat.acc-orange{--acc:var(--orange)}.stat.acc-violet{--acc:var(--violet)}.stat.acc-sky{--acc:var(--sky)}
+.stat .chip{transition:transform .15s}.stat:hover .chip{transform:scale(1.06)}
+/* Tabel Realisasi Bulan Lalu vs Bulan Ini */
+.cmp-table td{padding:13px 16px}.cmp-table th{padding:10px 16px}
+.cmp-lbl{display:flex;align-items:center;gap:12px}
+.cmp-lbl .chip{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none}
+.cmp-lbl b{display:block;font-weight:600;color:var(--ink)}
+.cmp-lbl small{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+.cmp-table td.cur b{font-size:14px}
+.cmp-diff{display:inline-flex;align-items:center;gap:5px;font-weight:700}
+.cmp-diff .ic{width:15px;height:15px;stroke-width:2.4}
+.cmp-diff.up{color:var(--green)}.cmp-diff.down{color:var(--red)}.cmp-diff.eq{color:var(--muted);font-weight:500}
+.cmp-chg{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.cmp-bars{display:grid;gap:3px;width:96px}
+.cmp-bars i{display:block;height:5px;border-radius:99px;background:var(--line)}
+.cmp-bars i.c{background:var(--acc,var(--blue))}
 .mini{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
 .mini>div{padding:14px 18px;border-top:1px solid var(--line-2);border-left:1px solid var(--line-2)}
 .mini>div:nth-child(4n+1){border-left:0}
@@ -325,6 +345,56 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
 .spin{width:44px;height:44px;border-radius:50%;border:4px solid #d5deea;border-top-color:var(--blue);animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* ---------- Dark mode (html[data-theme=dark]) ---------- */
+.theme-btn{width:40px;height:40px}
+:root[data-theme=dark]{
+  color-scheme:dark;
+  --bg:#0b1220; --surface:#121b2c; --surface-2:#172238; --hover:#1b2840; --line:#26344d; --line-2:#1e2a40;
+  --ink:#e7edf6; --ink-2:#c2cee0; --muted:#8d9cb3;
+  --blue:#3b8ee6; --blue-d:#2f7fd4; --blue-50:rgba(59,142,230,.15); --sky:#2bb8ec;
+  --green:#2fb36d; --green-50:rgba(47,179,109,.15); --orange:#f0992f; --orange-50:rgba(240,153,47,.15);
+  --red:#ef5d5d; --red-50:rgba(239,93,93,.15); --violet:#9a82f0; --violet-50:rgba(154,130,240,.16);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.35); --shadow:0 12px 32px -14px rgba(0,0,0,.7),0 2px 6px rgba(0,0,0,.35);
+}
+[data-theme=dark] .btn,[data-theme=dark] .btn-ghost,[data-theme=dark] input,[data-theme=dark] select,[data-theme=dark] textarea,
+[data-theme=dark] .chip-check span,[data-theme=dark] .period,[data-theme=dark] .user-btn,[data-theme=dark] .menu,[data-theme=dark] .stat,
+[data-theme=dark] .bank-card,[data-theme=dark] .modal-box,[data-theme=dark] #loginView,[data-theme=dark] .login-side,[data-theme=dark] .sticky-col{background-color:var(--surface)}
+[data-theme=dark] .btn-ghost:hover:not(:disabled),[data-theme=dark] .user-btn:hover,[data-theme=dark] .period button:hover,[data-theme=dark] .menu button:hover,
+[data-theme=dark] .modal-head .x,[data-theme=dark] .modal-head .x:hover,[data-theme=dark] tbody tr:hover td,[data-theme=dark] tbody tr:hover .sticky-col{background:var(--hover)}
+[data-theme=dark] thead th,[data-theme=dark] tfoot td,[data-theme=dark] thead .sticky-col,[data-theme=dark] tfoot .sticky-col,[data-theme=dark] .bank-head,
+[data-theme=dark] .modal-foot,[data-theme=dark] details.ter summary,[data-theme=dark] input[readonly],[data-theme=dark] .rule code,[data-theme=dark] .stepbox{background:var(--surface-2)}
+[data-theme=dark] thead th{color:var(--muted)}
+[data-theme=dark] .rule code{color:var(--ink-2)}
+[data-theme=dark] .topbar{background:rgba(18,27,44,.88)}
+[data-theme=dark] .btn-primary,[data-theme=dark] .btn-success,[data-theme=dark] .btn-amber{color:#fff}
+[data-theme=dark] .btn-primary{background:var(--blue)}[data-theme=dark] .btn-success{background:var(--green)}[data-theme=dark] .btn-amber{background:var(--orange)}
+[data-theme=dark] .btn-danger{background:var(--red-50)}[data-theme=dark] .btn-danger:hover{background:rgba(239,93,93,.25)}
+[data-theme=dark] .btn-soft{background:var(--blue-50)}[data-theme=dark] .btn-soft:hover{background:rgba(59,142,230,.25)}
+[data-theme=dark] .cmp-table th.cur,[data-theme=dark] .cmp-table td.cur{background:rgba(59,142,230,.08)}
+[data-theme=dark] .bar{background:var(--line)}
+[data-theme=dark] .delta.eq,[data-theme=dark] .b-src,[data-theme=dark] .b-ptkp,[data-theme=dark] .st-Resign{background:#1f2b40;color:var(--ink-2)}
+[data-theme=dark] .delta.up,[data-theme=dark] .st-PKWTT,[data-theme=dark] .b-final,[data-theme=dark] .b-GAJI,[data-theme=dark] .b-cair{color:#62d699}
+[data-theme=dark] .st-PKWT{color:#86bdf3}
+[data-theme=dark] .st-Probation,[data-theme=dark] .b-pending{color:#f4b066}
+[data-theme=dark] .st-Dirumahkan{background:rgba(194,65,12,.2);color:#f7a26b}
+[data-theme=dark] .b-draft{background:rgba(240,153,47,.14);color:#f4b066;border-color:rgba(240,153,47,.45)}
+[data-theme=dark] .g-in,[data-theme=dark] .g-tot{background:rgba(59,142,230,.16)!important;color:#9cc8f5!important}
+[data-theme=dark] .g-kas{background:rgba(240,153,47,.14)!important;color:#f4b066!important}
+[data-theme=dark] .g-out,[data-theme=dark] .g-outt{background:rgba(239,93,93,.14)!important;color:#f29a9a!important}
+[data-theme=dark] .g-net{background:rgba(47,179,109,.15)!important;color:#6fd8a0!important}
+[data-theme=dark] td.tot-in{background:rgba(59,142,230,.07)}
+[data-theme=dark] td.tot-out{background:rgba(239,93,93,.07);color:#f29a9a}
+[data-theme=dark] td.net{background:rgba(47,179,109,.08)}
+[data-theme=dark] .callout{color:#9cc8f5}
+[data-theme=dark] .callout.warn,[data-theme=dark] .warn{color:#f4b066}
+[data-theme=dark] .resultbox.ok{color:#6fd8a0}
+[data-theme=dark] .preview{background:rgba(59,142,230,.07);border-color:rgba(59,142,230,.3)}
+[data-theme=dark] .preview .row.total{border-top-color:rgba(59,142,230,.35)}
+[data-theme=dark] #loading{background:rgba(11,18,32,.55)}
+[data-theme=dark] .spin{border-color:#2a3a55;border-top-color:var(--blue)}
+[data-theme=dark] .empty .ic{color:#3a4a63}
+[data-theme=dark] .login-card h2{color:var(--ink)}
+
 /* ---------- Responsive ---------- */
 @media(max-width:1280px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{grid-template-columns:1fr 1fr 1fr}.toolbar .search{grid-column:1/-1}}
 @media(max-width:1100px){
@@ -410,6 +480,11 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
   <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
   <symbol id="i-sheet" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M12 11v8"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></symbol>
+  <symbol id="i-dn" viewBox="0 0 24 24"><path d="M7 7l10 10"/><path d="M17 8v9H8"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
   <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></symbol>
 </svg>
 
@@ -490,6 +565,7 @@ details.ter .table-wrap{max-height:280px;overflow:auto}
           <input type="month" id="period" aria-label="Periode">
           <button type="button" onclick="shiftPeriod(1)" aria-label="Periode berikutnya"><svg class="ic ic-sm"><use href="#i-right"/></svg></button>
         </div>
+        <button type="button" class="btn btn-ghost btn-icon theme-btn" id="themeBtn" onclick="toggleTheme()" title="Mode gelap" aria-label="Ganti tema terang/gelap"><svg class="ic"><use href="#i-moon"/></svg></button>
         <div class="user">
           <button class="user-btn" onclick="toggleMenu(event)"><span class="avatar" id="avatar">A</span><span class="nm" id="userChip"></span><svg class="ic ic-sm muted"><use href="#i-down"/></svg></button>
           <div class="menu" id="userMenu">
@@ -1086,6 +1162,18 @@ document.addEventListener('keydown', e => {
 $$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) { if (m.id === 'mAsk') askDone(false); else m.classList.remove('open'); } }));
 document.addEventListener('click', e => { if (!e.target.closest('.user')) $('#userMenu').classList.remove('open'); });
 function toggleMenu(e) { e.stopPropagation(); $('#userMenu').classList.toggle('open'); }
+/* Tema terang / gelap (disimpan per browser) */
+const isDark = () => document.documentElement.dataset.theme === 'dark';
+function syncThemeBtn() {
+  $('#themeBtn use').setAttribute('href', isDark() ? '#i-sun' : '#i-moon');
+  $('#themeBtn').title = isDark() ? 'Mode terang' : 'Mode gelap';
+}
+function toggleTheme() {
+  if (isDark()) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = 'dark';
+  try { localStorage.setItem('pjm_theme', isDark() ? 'dark' : 'light'); } catch (e) { }
+  syncThemeBtn();
+}
+syncThemeBtn();
 function toggleNav(force) { document.body.classList.toggle('nav-open', force === undefined ? !document.body.classList.contains('nav-open') : force); }
 function togglePw() { const i = $('#lgPass'); i.type = i.type === 'password' ? 'text' : 'password'; }
 const emptyRow = (cols, msg, icon) => `<tr><td colspan="${cols}" class="empty">${ic(icon || 'file', 'ic')}${msg}</td></tr>`;
@@ -1220,15 +1308,15 @@ const siteFilterOpts = (sel, rows) => {
 /* ============================ DASHBOARD ============================ */
 function renderDashboard() {
   const d = state.dashboard; if (!d) return;
-  const stat = (cls, chip, icon, lbl, val, foot) => `<div class="stat ${cls}"><div class="stat-top"><span class="lbl">${lbl}</span><span class="chip ${chip}">${ic(icon)}</span></div>
+  const stat = (acc, icon, lbl, val, foot) => `<div class="stat acc-${acc}"><div class="stat-top"><span class="lbl">${lbl}</span><span class="chip hi-${acc}">${ic(icon)}</span></div>
     <div class="val num">${val}</div><div class="foot">${foot}</div></div>`;
   const nb = state.batches.reduce((a, b) => a + b.batches.length, 0), nt = state.batches.reduce((a, b) => a + b.count, 0);
   $('#metrics').innerHTML =
-    stat('', 'hi-blue', 'users', 'Headcount Real', `${nf(d.headcount)} <small>karyawan</small>`, `${nf(d.payrollRows)} baris gaji periode ini`) +
-    stat('', 'hi-green', 'card', 'Total Gaji Bersih', rp(d.totalThp), 'Take Home Pay ' + esc(periodLabel(state.period))) +
-    stat('', d.drafts ? 'hi-orange' : 'hi-green', d.drafts ? 'info' : 'check', 'Status Data Payroll', d.drafts ? `${nf(d.drafts)} <small>draft</small>` : (d.payrollRows ? 'Final' : '-'),
+    stat('blue', 'users', 'Headcount Real', `${nf(d.headcount)} <small>karyawan</small>`, `${nf(d.payrollRows)} baris gaji periode ini`) +
+    stat('green', 'card', 'Total Gaji Bersih', rp(d.totalThp), 'Take Home Pay ' + esc(periodLabel(state.period))) +
+    stat(d.drafts ? 'orange' : 'green', d.drafts ? 'info' : 'check', 'Status Data Payroll', d.drafts ? `${nf(d.drafts)} <small>draft</small>` : (d.payrollRows ? 'Final' : '-'),
       d.drafts ? 'Perlu dikoreksi & dikonfirmasi' : (d.payrollRows ? 'Semua baris sudah dikonfirmasi' : 'Belum ada payroll')) +
-    stat('hero', '', 'send', 'Total Transfer Bank', rp(d.totalTransfer), `${nf(nt)} transfer &middot; ${nf(state.batches.length)} bank &middot; ${nf(nb)} batch`);
+    stat('violet', 'send', 'Total Transfer Bank', rp(d.totalTransfer), `${nf(nt)} transfer &middot; ${nf(state.batches.length)} bank &middot; ${nf(nb)} batch`);
   const P = state.period;
   const active = state.employees.filter(isActive).length;
   const baru = state.employees.filter(e => (e.startDate || '').slice(0, 7) === P).length;
@@ -1515,17 +1603,27 @@ function deltaHtml(cur, prev) {
 function renderCompare() {
   const S = state.summary; if (!S) { $('#stats3').innerHTML = ''; return; }
   const c = S.cur, p = S.prev, pl = periodLabel(p.period);
-  const card = (cls, chip, icon, lbl, k, foot) => `<div class="stat ${cls}"><div class="stat-top"><span class="lbl">${lbl}</span><span class="chip ${chip}">${ic(icon)}</span></div>
+  const card = (acc, icon, lbl, k, foot) => `<div class="stat acc-${acc}"><div class="stat-top"><span class="lbl">${lbl}</span><span class="chip hi-${acc}">${ic(icon)}</span></div>
     <div class="val num">${rp(c[k])}</div><div class="cmp">${deltaHtml(c[k], p[k])}<span>vs ${esc(pl)}: ${rp(p[k])}</span></div><div class="foot">${foot}</div></div>`;
   $('#stats3').innerHTML =
-    card('', 'hi-green', 'card', '1. Gaji Real (Take Home Pay)', 'thp', 'Gaji bersih yang diterima karyawan') +
-    card('', 'hi-blue', 'shield', '2. Gaji BPJS', 'kesSetor', 'Dasar iuran BPJS Kesehatan & Ketenagakerjaan') +
-    card('hero', '', 'receipt', '3. Gaji Pajak', 'taxSetor', 'Dasar PPh 21 (bruto TER)');
+    card('green', 'card', '1. Gaji Real (Take Home Pay)', 'thp', 'Gaji bersih yang diterima karyawan') +
+    card('blue', 'shield', '2. Gaji BPJS', 'kesSetor', 'Dasar iuran BPJS Kesehatan & Ketenagakerjaan') +
+    card('orange', 'receipt', '3. Gaji Pajak', 'taxSetor', 'Dasar PPh 21 (bruto TER)');
   $('#cmpHead').innerHTML = `<tr><th>Realisasi</th><th class="num">${esc(pl)}</th><th class="num cur">${esc(periodLabel(c.period))}</th><th class="num">Selisih</th><th class="num">Perubahan</th></tr>`;
-  const rows = [['Headcount (karyawan)', 'headcount', false], ['Gaji Real (Take Home Pay)', 'thp', true], ['Gaji BPJS', 'kesSetor', true],
-    ['Gaji Pajak', 'taxSetor', true]];
-  $('#cmpBody').innerHTML = rows.map(([l, k, money]) => { const d = c[k] - p[k], f = nf;
-    return `<tr><td class="lbl">${l}</td><td class="num">${f(p[k])}</td><td class="num cur"><b>${f(c[k])}</b></td><td class="num ${d > 0 ? 'c-green' : d < 0 ? 'c-red' : ''}">${d > 0 ? '+' : ''}${f(d)}</td><td class="num">${deltaHtml(c[k], p[k])}</td></tr>`; }).join('');
+  const rows = [
+    ['Headcount', 'karyawan menerima gaji', 'headcount', 'users', 'violet', ' org'],
+    ['Gaji Real', 'Take Home Pay (transfer)', 'thp', 'card', 'green', ''],
+    ['Gaji BPJS', 'dasar iuran BPJS', 'kesSetor', 'shield', 'blue', ''],
+    ['Gaji Pajak', 'dasar PPh 21 (TER)', 'taxSetor', 'receipt', 'orange', '']];
+  $('#cmpBody').innerHTML = rows.map(([l, sub, k, icon, acc, unit]) => {
+    const d = c[k] - p[k], dir = d > 0 ? 'up' : d < 0 ? 'down' : 'eq', max = Math.max(c[k], p[k]) || 1;
+    const w = v => Math.max(2, Math.round(v / max * 100));
+    return `<tr><td><div class="cmp-lbl"><span class="chip hi-${acc}">${ic(icon)}</span><div><b>${l}</b><small>${sub}</small></div></div></td>
+      <td class="num">${nf(p[k])}${unit}</td><td class="num cur"><b>${nf(c[k])}${unit}</b></td>
+      <td class="num"><span class="cmp-diff ${dir}">${ic(dir === 'up' ? 'up' : dir === 'down' ? 'dn' : 'minus')}${d > 0 ? '+' : ''}${nf(d)}</span></td>
+      <td class="num"><div class="cmp-chg" style="--acc:var(--${acc})">${deltaHtml(c[k], p[k])}
+        <div class="cmp-bars" title="${esc(pl)} vs ${esc(periodLabel(c.period))}"><i style="width:${w(p[k])}%"></i><i class="c" style="width:${w(c[k])}%"></i></div></div></td></tr>`;
+  }).join('');
   $('#cmpNote').textContent = c.drafts ? `${c.drafts} baris bulan ini masih DRAFT` : (c.rows ? 'Semua data bulan ini sudah dikonfirmasi' : '');
 }
 
